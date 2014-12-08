@@ -1,0 +1,18 @@
+{
+  "name": "m4b.github.io",
+  "description": "",
+  "homepage": "",
+  "keywords": ["programming languages", "pl", "computer science", "systems", "compile", "static", "typing", "types", "memory", "garbage collection"],
+  "author": "M. Barney",
+  "private": true,
+  "dependencies": {
+    "polymer": "Polymer/polymer#master",
+    "platform": "Polymer/platform#master",
+    "paper-elements": "Polymer/paper-elements#master"
+  },
+  "resolutions": {
+    "platform": "master",
+    "polymer": "master",
+    "core-component-page": "master"
+  }
+}
