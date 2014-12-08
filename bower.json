@@ -1,8 +1,20 @@
 {
   "name": "m4b.github.io",
-  "description": "",
+  "description": "Minutes of the Royal Engineering Programming Language Society",
   "homepage": "",
-  "keywords": ["programming languages", "pl", "computer science", "systems", "compile", "static", "typing", "types", "memory", "garbage collection"],
+  "keywords": [
+    "programming languages",
+    "pl",
+    "computer science",
+    "systems",
+    "compile",
+    "static",
+    "typing",
+    "types",
+    "memory",
+    "garbage collection",
+    "logic"
+  ],
   "author": "M. Barney",
   "private": true,
   "dependencies": {
@@ -13,6 +25,10 @@
   "resolutions": {
     "platform": "master",
     "polymer": "master",
-    "core-component-page": "master"
+    "core-component-page": "master",
+    "core-iconset-svg": "master",
+    "core-selection": "master",
+    "core-iconset": "master",
+    "core-meta": "master"
   }
 }
