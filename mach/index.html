@@ -203,7 +203,7 @@
     ἦσαν καὶ ἀγαθὰ τὰ μέγιστα, καὶ καλῶς ἂν εἶχεν. νῦν δὲ οὐδέτερα οἷοί τε: οὔτε γὰρ
     φρόνιμον οὔτε ἄφρονα δυνατοὶ ποιῆσαι, ποιοῦσι δὲ τοῦτο ὅτι ἂν τύχωσι.</p>
 </blockquote>
-<p><img src="/Users/matthewbarney/projects/binreader/graph/lib_dependency_graph.gv.png" alt="/usr/lib dependencies"></p>
+<p><img src="lib_dependency_graph.png" alt="/usr/lib dependencies"></p>
 <p>This is a writeup detailing some of the peculiarities of the mach binary format.</p>
 <p>There are several resources available locally, and on the internet, but none of them were/are very comprehensive:</p>
 <ul>
@@ -419,5 +419,5 @@ to interpret it.</p>
 <p>The graph that adorns the beginning of this article is generated from my program, which computes the dynamic library interdependencies in <code>/usr/lib/*</code> (really any directory I specify).  I plan to open source the software at some point soon; hopefully after elf binary analysis is properly integrated.</p>
 <p>The software tool is completely written in OCaml, and many thanks to the researchers at INRIA and the small, but dedicated community surrounding the language.</p>
 <p>But I&#39;ll just end the article with another graph my tool generates, this time of the much linked-against <code>libz.dylib</code>, in all it&#39;s logical splendor:</p>
-<p><img src="/Users/matthewbarney/projects/binreader/doc/libz.dylib.gv.png" alt="libz"></p></body>
+<p><img src="libz.dylib.png" alt="libz"></p></body>
 </html>
