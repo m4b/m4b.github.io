@@ -1,6 +1,16 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-61305800-1', 'auto');
+      ga('send', 'pageview');
+
+    </script>
     <meta charset="utf-8" />
       <title>Mach-O Binaries</title>
       <style>.markdown-preview { font-family: 'Helvetica Neue', Helvetica, sans-serif; font-size: 14px; line-height: 1.6; overflow: scroll; box-sizing: border-box; padding: 20px; background-color: rgb(255, 255, 255); }
@@ -419,5 +429,6 @@ to interpret it.</p>
 <p>The graph that adorns the beginning of this article is generated from my program, which computes the dynamic library interdependencies in <code>/usr/lib/*</code> (really any directory I specify).  I plan to open source the software at some point soon; hopefully after elf binary analysis is properly integrated.</p>
 <p>The software tool is completely written in OCaml, and many thanks to the researchers at INRIA and the small, but dedicated community surrounding the language.</p>
 <p>But I&#39;ll just end the article with another graph my tool generates, this time of the much linked-against <code>libz.dylib</code>, in all its logical splendor:</p>
-<p><img src="libz.dylib.png" alt="libz"></p></body>
+    <p><img src="libz.dylib.png" alt="libz"></p></body>
+  
 </html>
