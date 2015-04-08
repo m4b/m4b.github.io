@@ -48,6 +48,9 @@ figure > img {
 figcaption {
   font-size: 14px; }
 
+.blog-caption {
+  text-align: center; }
+
 /**
  * Lists
  */

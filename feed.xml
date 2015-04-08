@@ -6,8 +6,8 @@
 </description>
     <link>http://m4b.github.io.com/</link>
     <atom:link href="http://m4b.github.io.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Tue, 07 Apr 2015 22:54:31 -0600</pubDate>
-    <lastBuildDate>Tue, 07 Apr 2015 22:54:31 -0600</lastBuildDate>
+    <pubDate>Tue, 07 Apr 2015 23:32:54 -0600</pubDate>
+    <lastBuildDate>Tue, 07 Apr 2015 23:32:54 -0600</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
     
       <item>
@@ -455,11 +455,14 @@ to interpret it.&lt;/p&gt;
 
 &lt;p&gt;If you&amp;#39;ve still got that hex editor running, jump to 0xf90 in &lt;code&gt;libtoc.dylib&lt;/code&gt; and you should see &lt;code&gt;ef be ad de&lt;/code&gt; --- dead beef, bro.  If you don&amp;#39;t know why it appears like that I&amp;#39;m pretty amazed you read this far, but you should probably stop. ಠ_ಠ&lt;/p&gt;
 
-&lt;p&gt;Lastly, and &lt;strong&gt;very importantly&lt;/strong&gt;, the &lt;em&gt;next&lt;/em&gt; uleb128 after whatever type the symbol is (so, depending on the type, it could be several bytes or uleb&amp;#39;s later, see point 2. in the mach trie summary), is the number of child branches.  In the case of &amp;quot;kTOC&lt;em&gt;MAGICAL&lt;/em&gt;FUN&amp;quot;, the number is 0.  But, it doesn&amp;#39;t have to be.  The node with terminal export information can also have children; a good example of this can be found in &lt;code&gt;/usr/lib/system/libsystem_c.dylib&lt;/code&gt; with &lt;code&gt;_printf&lt;/code&gt; and &lt;code&gt;_printf_l&lt;/code&gt;, where the latter will be a child node containing the export information for &lt;code&gt;_printf&lt;/code&gt;; don&amp;#39;t terminate your loop (or recursion if you&amp;#39;re awesome) when you encounter a &amp;quot;terminal&amp;quot; node, as strange as that sounds, because it might have children.&lt;/p&gt;
+&lt;p&gt;Lastly, and &lt;strong&gt;very importantly&lt;/strong&gt;, the &lt;em&gt;next&lt;/em&gt; uleb128 after whatever type the symbol is (so, depending on the type, it could be several bytes or uleb&amp;#39;s later, see point 2. in the mach trie summary), is the number of child branches.  In the case of &amp;quot;kTOC_MAGICAL_FUN&amp;quot;, the number is 0.  But, it doesn&amp;#39;t have to be.  The node with terminal export information can also have children; a good example of this can be found in &lt;code&gt;/usr/lib/system/libsystem_c.dylib&lt;/code&gt; with &lt;code&gt;_printf&lt;/code&gt; and &lt;code&gt;_printf_l&lt;/code&gt;, where the latter will be a child node containing the export information for &lt;code&gt;_printf&lt;/code&gt;; don&amp;#39;t terminate your loop (or recursion if you&amp;#39;re awesome) when you encounter a &amp;quot;terminal&amp;quot; node, as strange as that sounds, because it might have children.&lt;/p&gt;
 
 &lt;h3&gt;Imports&lt;/h3&gt;
 
-&lt;p&gt;&lt;img src=&quot;/images/linux_imports.png&quot; alt=&quot;darwin /usr/lib/ imports wordmap&quot;&gt;&lt;/p&gt;
+&lt;figure&gt;
+&lt;img src=&quot;/images/darwin_system_imports.png&quot; alt=&quot;hiya&quot;/&gt;
+&lt;figcaption class=&quot;blog-caption&quot;&gt;A wordcloud for the the most common imports in /usr/lib/ &lt;/figcaption&gt;
+&lt;/figure&gt;
 
 &lt;p&gt;Imports on mach are stored in the same linkedit section as exports are.  As mentioned earlier, they are  &amp;quot;encoded&amp;quot; using a finite state automaton.  The FSA accepts so-called &amp;quot;bind opcodes&amp;quot;, which have immediate and uleb128/sleb128 arguments, which alter the current record.  When a &amp;quot;bind&amp;quot; bind opcode is encountered, it pushes the current import symbol information record onto a list or array, however you want to think about it.&lt;/p&gt;
 

@@ -514,11 +514,14 @@ to interpret it.</p>
 
 <p>If you&#39;ve still got that hex editor running, jump to 0xf90 in <code>libtoc.dylib</code> and you should see <code>ef be ad de</code> --- dead beef, bro.  If you don&#39;t know why it appears like that I&#39;m pretty amazed you read this far, but you should probably stop. ಠ_ಠ</p>
 
-<p>Lastly, and <strong>very importantly</strong>, the <em>next</em> uleb128 after whatever type the symbol is (so, depending on the type, it could be several bytes or uleb&#39;s later, see point 2. in the mach trie summary), is the number of child branches.  In the case of &quot;kTOC<em>MAGICAL</em>FUN&quot;, the number is 0.  But, it doesn&#39;t have to be.  The node with terminal export information can also have children; a good example of this can be found in <code>/usr/lib/system/libsystem_c.dylib</code> with <code>_printf</code> and <code>_printf_l</code>, where the latter will be a child node containing the export information for <code>_printf</code>; don&#39;t terminate your loop (or recursion if you&#39;re awesome) when you encounter a &quot;terminal&quot; node, as strange as that sounds, because it might have children.</p>
+<p>Lastly, and <strong>very importantly</strong>, the <em>next</em> uleb128 after whatever type the symbol is (so, depending on the type, it could be several bytes or uleb&#39;s later, see point 2. in the mach trie summary), is the number of child branches.  In the case of &quot;kTOC_MAGICAL_FUN&quot;, the number is 0.  But, it doesn&#39;t have to be.  The node with terminal export information can also have children; a good example of this can be found in <code>/usr/lib/system/libsystem_c.dylib</code> with <code>_printf</code> and <code>_printf_l</code>, where the latter will be a child node containing the export information for <code>_printf</code>; don&#39;t terminate your loop (or recursion if you&#39;re awesome) when you encounter a &quot;terminal&quot; node, as strange as that sounds, because it might have children.</p>
 
 <h3>Imports</h3>
 
-<p><img src="/images/linux_imports.png" alt="darwin /usr/lib/ imports wordmap"></p>
+<figure>
+<img src="/images/darwin_system_imports.png" alt="hiya"/>
+<figcaption class="blog-caption">A wordcloud for the the most common imports in /usr/lib/ </figcaption>
+</figure>
 
 <p>Imports on mach are stored in the same linkedit section as exports are.  As mentioned earlier, they are  &quot;encoded&quot; using a finite state automaton.  The FSA accepts so-called &quot;bind opcodes&quot;, which have immediate and uleb128/sleb128 arguments, which alter the current record.  When a &quot;bind&quot; bind opcode is encountered, it pushes the current import symbol information record onto a list or array, however you want to think about it.</p>
 
