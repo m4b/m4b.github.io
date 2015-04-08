@@ -587,7 +587,7 @@ to interpret it.</p>
 
 <p><code>gcc -dynamiclib -install_name @executable_path/lib/libtoc.dylib lib/libtoc.c -o lib/libtoc.dylib</code></p>
 
-<p>What this did was generate a dynamic library named <code>libtoc.dylib</code> with an install name (<code>LC_DYLD_ID</code>) of &quot;@executable<em>path/lib/libtoc.dylib&quot;.  What _this</em> does is basically require any binary linking against this newly recompiled <code>libtoc.dylib</code> to be <strong>executed</strong> in a folder which contains a folder named <code>lib</code>, which contains <code>libtoc.dylib</code> --- which if you setup your directory structure above, is the case.  It&#39;s weird, but whatever.</p>
+<p>What this did was generate a dynamic library named <code>libtoc.dylib</code> with an install name (<code>LC_DYLD_ID</code>) of &quot;@executable_path/lib/libtoc.dylib&quot;.  What <em>this</em> does is basically require any binary linking against this newly recompiled <code>libtoc.dylib</code> to be <strong>executed</strong> in a folder which contains a folder named <code>lib</code>, which contains <code>libtoc.dylib</code> --- which if you setup your directory structure above, is the case.  It&#39;s weird, but whatever.</p>
 
 <p>You should be able to compile <code>toc.c</code> now with something like:</p>
 

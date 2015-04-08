@@ -6,8 +6,8 @@
 </description>
     <link>http://m4b.github.io.com/</link>
     <atom:link href="http://m4b.github.io.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Tue, 07 Apr 2015 23:32:54 -0600</pubDate>
-    <lastBuildDate>Tue, 07 Apr 2015 23:32:54 -0600</lastBuildDate>
+    <pubDate>Tue, 07 Apr 2015 23:37:22 -0600</pubDate>
+    <lastBuildDate>Tue, 07 Apr 2015 23:37:22 -0600</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
     
       <item>
@@ -528,7 +528,7 @@ to interpret it.&lt;/p&gt;
 
 &lt;p&gt;&lt;code&gt;gcc -dynamiclib -install_name @executable_path/lib/libtoc.dylib lib/libtoc.c -o lib/libtoc.dylib&lt;/code&gt;&lt;/p&gt;
 
-&lt;p&gt;What this did was generate a dynamic library named &lt;code&gt;libtoc.dylib&lt;/code&gt; with an install name (&lt;code&gt;LC_DYLD_ID&lt;/code&gt;) of &amp;quot;@executable&lt;em&gt;path/lib/libtoc.dylib&amp;quot;.  What _this&lt;/em&gt; does is basically require any binary linking against this newly recompiled &lt;code&gt;libtoc.dylib&lt;/code&gt; to be &lt;strong&gt;executed&lt;/strong&gt; in a folder which contains a folder named &lt;code&gt;lib&lt;/code&gt;, which contains &lt;code&gt;libtoc.dylib&lt;/code&gt; --- which if you setup your directory structure above, is the case.  It&amp;#39;s weird, but whatever.&lt;/p&gt;
+&lt;p&gt;What this did was generate a dynamic library named &lt;code&gt;libtoc.dylib&lt;/code&gt; with an install name (&lt;code&gt;LC_DYLD_ID&lt;/code&gt;) of &amp;quot;@executable_path/lib/libtoc.dylib&amp;quot;.  What &lt;em&gt;this&lt;/em&gt; does is basically require any binary linking against this newly recompiled &lt;code&gt;libtoc.dylib&lt;/code&gt; to be &lt;strong&gt;executed&lt;/strong&gt; in a folder which contains a folder named &lt;code&gt;lib&lt;/code&gt;, which contains &lt;code&gt;libtoc.dylib&lt;/code&gt; --- which if you setup your directory structure above, is the case.  It&amp;#39;s weird, but whatever.&lt;/p&gt;
 
 &lt;p&gt;You should be able to compile &lt;code&gt;toc.c&lt;/code&gt; now with something like:&lt;/p&gt;
 
