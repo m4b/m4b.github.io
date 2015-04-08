@@ -316,6 +316,10 @@ pre {
       .post-content h4 {
         font-size: 18px; } }
 
+.image-list {
+  list-style: none;
+  text-align: center; }
+
 /**
  * Syntax highlighting styles
  */
