@@ -6,8 +6,8 @@
 </description>
     <link>http://m4b.github.io.com/</link>
     <atom:link href="http://m4b.github.io.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Wed, 08 Apr 2015 01:46:51 -0600</pubDate>
-    <lastBuildDate>Wed, 08 Apr 2015 01:46:51 -0600</lastBuildDate>
+    <pubDate>Fri, 10 Apr 2015 19:42:20 -0600</pubDate>
+    <lastBuildDate>Fri, 10 Apr 2015 19:42:20 -0600</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
     
       <item>
@@ -20,9 +20,13 @@
 
 &lt;p&gt;&lt;img src=&quot;/images/lib_dependency_graph.png&quot; alt=&quot;/usr/lib dependencies&quot;&gt;&lt;/p&gt;
 
-&lt;p&gt;This is a writeup detailing some of the peculiarities of the mach binary format.&lt;/p&gt;
+&lt;p&gt;This is a article detailing some of the peculiarities of the mach binary format.  In particular, what interests me is the internal logical structure of a mach-o binary is: how it works, what makes it work, where the code is, how the code is organized, where the exports and imports are, how they&amp;#39;re organized, how they&amp;#39;re imported, how they&amp;#39;re exported, etc.&lt;/p&gt;
 
-&lt;p&gt;There are several resources available locally, and on the internet, but none of them were/are very comprehensive:&lt;/p&gt;
+&lt;p&gt;As such, it&amp;#39;s not a tutorial on reverse engineering per say, but more geared towards someone who might want to &lt;em&gt;output&lt;/em&gt; a mach-o binary (like a compiler writer).  Of course if you are doing reverse engineering, the more you know about how it all works the better.&lt;/p&gt;
+
+&lt;p&gt;Mostly though, this is simply a record so I do not forget.&lt;/p&gt;
+
+&lt;p&gt;There are several resources available locally and on the internet concerning these matters, but none of them were/are very comprehensive or in-depth enough:&lt;/p&gt;
 
 &lt;ul&gt;
 &lt;li&gt;Apple C headers, primarily check out:
@@ -37,9 +41,7 @@
 &lt;li&gt;And once you&amp;#39;re done figuring out the bind opcodes, in order to understand mach exports you should cross reference the comments in &lt;code&gt;/usr/include/mach-o/loader.h&lt;/code&gt; for the &lt;code&gt;dyld_info_command&lt;/code&gt; struct with two methods in dyld&amp;#39;s source code for loading modern &amp;quot;compressed&amp;quot; binary images (&lt;code&gt;ImageLoaderMachOCompressed.cpp&lt;/code&gt;): &lt;code&gt;ImageLoaderMachOCompressed::trieWalk&lt;/code&gt; and &lt;code&gt;ImageLoaderMachOCompressed::findExportedSymbol&lt;/code&gt;.  Hint: it&amp;#39;s a &lt;a href=&quot;http://en.wikipedia.org/wiki/Trie&quot;&gt;trie&lt;/a&gt;.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;I&amp;#39;m sure there are other resources, but they&amp;#39;re usually old.  I couldn&amp;#39;t find much, sorry.  &lt;/p&gt;
-
-&lt;p&gt;Mostly, this is simply a record so I do not forget.&lt;/p&gt;
+&lt;p&gt;I&amp;#39;m sure there are other resources, but they&amp;#39;re usually old, or incomplete, or not detailed enough.  I couldn&amp;#39;t find much, sorry.&lt;/p&gt;
 
 &lt;h2&gt;Load Commands&lt;/h2&gt;
 
@@ -115,7 +117,7 @@ Imports (2)
 
 &lt;p&gt;OSX, for better or worse (better), uses a two-level namespace for resolving undefined symbol references (imports).  What that means is that imported symbols have a pointer to &lt;em&gt;which&lt;/em&gt; library they&amp;#39;re from; which is &lt;em&gt;awesome&lt;/em&gt;.&lt;/p&gt;
 
-&lt;p&gt;If you&amp;#39;ve got a million imports, do you know how a flat namespace dynamic library loader will resolve that undefined symbol?  Yes, it will load each referenced library,  searching its exported symbols until it finds a match, and then returns that symbol (or rather the offset to the symbol + the virtual memory address of the dylib in the plt or got).&lt;/p&gt;
+&lt;p&gt;If you&amp;#39;ve got a million imports, do you know how a flat namespace dynamic library loader will resolve that undefined symbol?  Yes, it will load each referenced library, searching its exported symbols until it finds a match (which is usually constant time, assuming the symbols are hashed), and then returns that symbol (or rather the offset to the symbol + the virtual memory address of the dylib in the plt or got).&lt;/p&gt;
 
 &lt;p&gt;So for flat namespace lookups:&lt;/p&gt;
 
@@ -749,7 +751,7 @@ End of opcode stream
         
         <category>reverse engineering</category>
         
-        <category>hacking</category>
+        <category>understanding</category>
         
         <category>symbols</category>
         

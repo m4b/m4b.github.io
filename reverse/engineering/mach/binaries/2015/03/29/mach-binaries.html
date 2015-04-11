@@ -83,9 +83,13 @@
 
 <p><img src="/images/lib_dependency_graph.png" alt="/usr/lib dependencies"></p>
 
-<p>This is a writeup detailing some of the peculiarities of the mach binary format.</p>
+<p>This is a article detailing some of the peculiarities of the mach binary format.  In particular, what interests me is the internal logical structure of a mach-o binary is: how it works, what makes it work, where the code is, how the code is organized, where the exports and imports are, how they&#39;re organized, how they&#39;re imported, how they&#39;re exported, etc.</p>
 
-<p>There are several resources available locally, and on the internet, but none of them were/are very comprehensive:</p>
+<p>As such, it&#39;s not a tutorial on reverse engineering per say, but more geared towards someone who might want to <em>output</em> a mach-o binary (like a compiler writer).  Of course if you are doing reverse engineering, the more you know about how it all works the better.</p>
+
+<p>Mostly though, this is simply a record so I do not forget.</p>
+
+<p>There are several resources available locally and on the internet concerning these matters, but none of them were/are very comprehensive or in-depth enough:</p>
 
 <ul>
 <li>Apple C headers, primarily check out:
@@ -100,9 +104,7 @@
 <li>And once you&#39;re done figuring out the bind opcodes, in order to understand mach exports you should cross reference the comments in <code>/usr/include/mach-o/loader.h</code> for the <code>dyld_info_command</code> struct with two methods in dyld&#39;s source code for loading modern &quot;compressed&quot; binary images (<code>ImageLoaderMachOCompressed.cpp</code>): <code>ImageLoaderMachOCompressed::trieWalk</code> and <code>ImageLoaderMachOCompressed::findExportedSymbol</code>.  Hint: it&#39;s a <a href="http://en.wikipedia.org/wiki/Trie">trie</a>.</li>
 </ul>
 
-<p>I&#39;m sure there are other resources, but they&#39;re usually old.  I couldn&#39;t find much, sorry.  </p>
-
-<p>Mostly, this is simply a record so I do not forget.</p>
+<p>I&#39;m sure there are other resources, but they&#39;re usually old, or incomplete, or not detailed enough.  I couldn&#39;t find much, sorry.</p>
 
 <h2>Load Commands</h2>
 
@@ -178,7 +180,7 @@ Imports (2)
 
 <p>OSX, for better or worse (better), uses a two-level namespace for resolving undefined symbol references (imports).  What that means is that imported symbols have a pointer to <em>which</em> library they&#39;re from; which is <em>awesome</em>.</p>
 
-<p>If you&#39;ve got a million imports, do you know how a flat namespace dynamic library loader will resolve that undefined symbol?  Yes, it will load each referenced library,  searching its exported symbols until it finds a match, and then returns that symbol (or rather the offset to the symbol + the virtual memory address of the dylib in the plt or got).</p>
+<p>If you&#39;ve got a million imports, do you know how a flat namespace dynamic library loader will resolve that undefined symbol?  Yes, it will load each referenced library, searching its exported symbols until it finds a match (which is usually constant time, assuming the symbols are hashed), and then returns that symbol (or rather the offset to the symbol + the virtual memory address of the dylib in the plt or got).</p>
 
 <p>So for flat namespace lookups:</p>
 
@@ -823,7 +825,7 @@ End of opcode stream
       <div class="footer-col  footer-col-1">
         <ul class="contact-list">
           <li>m4b mov</li>
-          <li><a href="mailto:"></a></li>
+          <li><a href="mailto:m4b.github.io@gmail.com">m4b.github.io@gmail.com</a></li>
         </ul>
       </div>
 
