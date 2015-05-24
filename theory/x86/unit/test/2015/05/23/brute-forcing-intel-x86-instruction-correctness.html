@@ -1,0 +1,128 @@
+<p>Pdf version <a href="/files/interns.pdf">here</a></p>
+
+<hr>
+
+<p><html >
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=US-ASCII">
+<meta name="generator" content="hevea 2.23">
+<style type="text/css">
+.li-itemize{margin:1ex 0ex;}
+.li-enumerate{margin:1ex 0ex;}
+.dd-description{margin:0ex 0ex 1ex 4ex;}
+.dt-description{margin:0ex;}
+.toc{list-style:none;}
+.footnotetext{margin:0ex; padding:0ex;}
+div.footnotetext P{margin:0px; text-indent:1em;}
+.thefootnotes{text-align:left;margin:0ex;}
+.dt-thefootnotes{margin:0em;}
+.dd-thefootnotes{margin:0em 0em 0em 2em;}
+.footnoterule{margin:1em auto 1em 0px;width:50%;}
+.caption{padding-left:2ex; padding-right:2ex; margin-left:auto; margin-right:auto}
+.title{margin:2ex auto;text-align:center}
+.titlemain{margin:1ex 2ex 2ex 1ex;}
+.titlerest{margin:0ex 2ex;}
+.center{text-align:center;margin-left:auto;margin-right:auto;}
+.flushleft{text-align:left;margin-left:0ex;margin-right:auto;}
+.flushright{text-align:right;margin-left:auto;margin-right:0ex;}
+div table{margin-left:inherit;margin-right:inherit;margin-bottom:2px;margin-top:2px}
+td table{margin:auto;}
+table{border-collapse:collapse;}
+td{padding:0;}
+.cellpadding0 tr td{padding:0;}
+.cellpadding1 tr td{padding:1px;}
+pre{text-align:left;margin-left:0ex;margin-right:auto;}
+blockquote{margin-left:4ex;margin-right:4ex;text-align:left;}
+td p{margin:0px;}
+.boxed{border:1px solid black}
+.textboxed{border:1px solid black}
+.vbar{border:none;width:2px;background-color:black;}
+.hbar{border:none;height:2px;width:100%;background-color:black;}
+.hfill{border:none;height:1px;width:200%;background-color:black;}
+.vdisplay{border-collapse:separate;border-spacing:2px;width:auto; empty-cells:show; border:2px solid red;}
+.vdcell{white-space:nowrap;padding:0px; border:2px solid green;}
+.display{border-collapse:separate;border-spacing:2px;width:auto; border:none;}
+.dcell{white-space:nowrap;padding:0px; border:none;}
+.dcenter{margin:0ex auto;}
+.vdcenter{border:solid #FF8000 2px; margin:0ex auto;}
+.minipage{text-align:left; margin-left:0em; margin-right:auto;}
+.marginpar{border:solid thin black; width:20%; text-align:left;}
+.marginparleft{float:left; margin-left:0ex; margin-right:1ex;}
+.marginparright{float:right; margin-left:1ex; margin-right:0ex;}
+.theorem{text-align:left;margin:1ex auto 1ex 0ex;}
+.part{margin:2ex auto;text-align:center}
+</style>
+<title>Brute Forcing Intel x86 Instruction Correctness Via Unit Testing and an Intern Pool
+</title>
+</head>
+<body >
+<table class="title"><tr><td style="padding:1ex"><h1 class="titlemain">Brute Forcing Intel x86 Instruction Correctness Via Unit Testing and an Intern Pool</h1><h3 class="titlerest">m4b.github.io@gmail.com</h3></td></tr>
+</table><p>To begin, let <em>f(x)</em> be a function from the number of bytes to the number of possible binary sequences for that number of bytes:</p><table class="display dcenter"><tr style="vertical-align:middle"><td class="dcell">
+<span style="font-style:italic">f</span>(<span style="font-style:italic">x</span>)&#XA0;=&#XA0;2<sup>(8<em><span style="font-style:italic">x</span>)</sup>
+&#XA0;&#XA0;&#XA0;&#XA0;(1)</td></tr>
+</table><p>Since the largest Intel instruction can be 15 bytes, and the shortest 1 byte, we have exactly:</p><table class="display dcenter"><tr style="vertical-align:middle"><td class="dcell">
+&#X3C9;&#XA0;=&#XA0;5.21265880699967<span style="font-style:italic">e</span>+33&#XA0;=&#XA0;</td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center">15</td></tr>
+<tr><td class="dcell" style="text-align:center"><span style="font-size:xx-large">&#X2211;</span></td></tr>
+<tr><td class="dcell" style="text-align:center"><span style="font-style:italic">i</span>=1</td></tr>
+</table></td><td class="dcell"><span style="font-style:italic">f</span>(<span style="font-style:italic">i</span>)
+&#XA0;&#XA0;&#XA0;&#XA0;(2)</td></tr>
+</table><p>possible instructions to test (2 to the power of 15 * 8, for example, is the number of different combinations of 0s and 1s for a 15-byte sequence, and hence the number of possible 15-byte instructions).</p><p>Let&#X2019;s suppose half of them <code>#UD</code>. A more liberal estimate might be more appropriate, but half seems sufficient for our demonstration here.</p><p>Now, let&#X2019;s suppose we have access to a large pool of interns, <em>p</em>, whom we task with committing a binary sequence, <span style="font-style:italic">b</span><sub><span style="font-style:italic">i</span></sub>, of size <em>i</em>, where  1 &#X2264; <span style="font-style:italic">i</span> &#X2264; 15, and an expected value, <span style="font-style:italic">e</span><sub><span style="font-style:italic">j</span></sub>, to a text file. To make things simple, let&#X2019;s suppose <span style="font-style:italic">e</span><sub><span style="font-style:italic">j</span></sub> is a constant number of bytes on disk, say 32.</p><p>Hence, the total number of bytes for this text file we require is therefore only:</p><table class="display dcenter"><tr style="vertical-align:middle"><td class="dcell">
+</td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center"><table class="display"><tr style="vertical-align:middle"><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center">15</td></tr>
+<tr><td class="dcell" style="text-align:center"><span style="font-size:xx-large">&#X2211;</span></td></tr>
+<tr><td class="dcell" style="text-align:center"><span style="font-style:italic">i</span>=1</td></tr>
+</table></td><td class="dcell"><span style="font-style:italic">f</span>(<span style="font-style:italic">i</span>)&#XA0;</em>&#XA0;<span style="font-style:italic">i</span>&#XA0;<em>&#XA0;(32+2)</td></tr>
+</table></td></tr>
+<tr><td class="hbar"></td></tr>
+<tr><td class="dcell" style="text-align:center">2</td></tr>
+</table></td><td class="dcell">
+&#XA0;&#XA0;&#XA0;&#XA0;(3)</td></tr>
+</table><p>where we add two (2) bytes for two (2) new lines in order to make the resulting text file more human readable.</p><p>Further, let us suppose we have already generated the binary sequences, <em>and</em> the new lines, which leaves only (&#X3C9; * 32)/2 bytes to be committed to disk, by our pool of interns, <em>p</em>.</p><p>Let us further suppose that they only commit correct expected values (or their employment will be promptly terminated, and they will <em>not</em> receive a letter of recommendation).</p><p>Furthermore, as can be expected from our harsh treatment, they are exceptionally efficient at their task, and after each timestep, commit two (2) times as many expected values to disk.</p><p>Their rate of work<sup><a id="text1" href="#note1">1</a></sup> , in bytes committed to disk, is therefore given by:</p><table class="display dcenter"><tr style="vertical-align:middle"><td class="dcell">
+<span style="font-style:italic">i</span>(<span style="font-style:italic">t</span>)&#XA0;=&#XA0;&#XA0;<span style="font-style:italic">p</span>&#XA0;</em>&#XA0;32&#XA0;<em>&#XA0;</td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center"><span style="font-style:italic">t</span></td></tr>
+<tr><td class="dcell" style="text-align:center"><span style="font-size:xx-large">&#X2211;</span></td></tr>
+<tr><td class="dcell" style="text-align:center"><span style="font-style:italic">k</span>=1</td></tr>
+</table></td><td class="dcell">&#XA0;2<sup>(<span style="font-style:italic">k</span>&#X2212;1)</sup>
+&#XA0;&#XA0;&#XA0;&#XA0;(4)</td></tr>
+</table><p>where <em>p</em> is the number of interns and <em>t</em> is a continuous multiplier for some unit of time &gt; 0.</p><p>As such, we wish to know what <em>t</em> equals when <span style="font-style:italic">i</span>(<span style="font-style:italic">t</span>) = (&#X3C9; * 32)/2</p><p>Simple algebra<sup><a id="text2" href="#note2">2</a></sup> gives us <em>t</em> as a function of <em>i</em>:</p><table class="display dcenter"><tr style="vertical-align:middle"><td class="dcell">
+<span style="font-style:italic">t</span>(<span style="font-style:italic">i</span>)&#XA0;=&#XA0;</td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center"><table class="display"><tr style="vertical-align:middle"><td class="dcell"><span style="font-style:italic">ln</span>&#XA0;(</td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center"><span style="font-style:italic">i</span></td></tr>
+<tr><td class="hbar"></td></tr>
+<tr><td class="dcell" style="text-align:center">(32&#XA0;</em>&#XA0;<span style="font-style:italic">p</span>)</td></tr>
+</table></td><td class="dcell">&#XA0;+&#XA0;1)</td></tr>
+</table></td></tr>
+<tr><td class="hbar"></td></tr>
+<tr><td class="dcell" style="text-align:center"><span style="font-style:italic">ln</span>&#XA0;2</td></tr>
+</table></td><td class="dcell">&#XA0;&#XA0;&#XA0;&#XA0;(5)</td></tr>
+</table><p>For the sake of argument, let us suppose our summer internship program had a successful recruiting session, and we yielded four (4) interns, hence <span style="font-style:italic">p</span> = 4 and therefore:
+</p><table class="display dcenter"><tr style="vertical-align:middle"><td class="dcell">
+</td><td class="dcell"><table class="display"><tr style="vertical-align:middle"><td class="dcell">
+<span style="font-style:italic">t</span>(&#X3C9;&#XA0;<em>&#XA0;16)=&#XA0;</td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center"><table class="display"><tr style="vertical-align:middle"><td class="dcell"><span style="font-style:italic">ln</span>&#XA0;(</td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center">&#X3C9;&#XA0;</em>&#XA0;16</td></tr>
+<tr><td class="hbar"></td></tr>
+<tr><td class="dcell" style="text-align:center">32*4</td></tr>
+</table></td><td class="dcell">&#XA0;+&#XA0;1)</td></tr>
+</table></td></tr>
+<tr><td class="hbar"></td></tr>
+<tr><td class="dcell" style="text-align:center"><span style="font-style:italic">ln</span>&#XA0;2</td></tr>
+</table></td><td class="dcell">=&#XA0;</td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center"><table class="display"><tr style="vertical-align:middle"><td class="dcell"><span style="font-style:italic">ln</span>&#XA0;(</td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center">8.34025409119947203<span style="font-style:italic">e</span>+34</td></tr>
+<tr><td class="hbar"></td></tr>
+<tr><td class="dcell" style="text-align:center">128</td></tr>
+</table></td><td class="dcell">&#XA0;+&#XA0;1)</td></tr>
+</table></td></tr>
+<tr><td class="hbar"></td></tr>
+<tr><td class="dcell" style="text-align:center">0.693147180559945286</td></tr>
+</table></td><td class="dcell">=&#XA0;</td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center">75.5569565803551768</td></tr>
+<tr><td class="hbar"></td></tr>
+<tr><td class="dcell" style="text-align:center">0.693147180559945286</td></tr>
+</table></td><td class="dcell">=&#XA0;109.005646563141141
+</td></tr>
+</table></td><td class="dcell">
+&#XA0;&#XA0;&#XA0;&#XA0;(6)</td></tr>
+</table><p>Therefore, if our unit of time is a single day, which seems reasonable given the constraints above, then we can estimate that a pack of four (4) interns can finish writing a complete x86 instruction unit test suite for <em>expected values</em> to disk in approximately the duration of a 3 and 1/2 month summer internship.</p><p>Figure <a href="#g1">1</a> illustrates the effect of <em>p</em> on <em>t</em>, when our pool of interns monitonically increases.</p><blockquote class="figure"><div class="center"><div class="center"><hr style="width:80%;height:2"></div>
+<img src="/images/interns001.png">
+<div class="caption"><table style="border-spacing:6px;border-collapse:separate;" class="cellpading0"><tr><td style="vertical-align:top;text-align:left;" >Figure 1: Effect of number of interns <em>p</em> on <em>t</em></td></tr>
+</table></div><a id="g1"></a>
+<div class="center"><hr style="width:80%;height:2"></div></div></blockquote><p>As expected, adding more interns only marginally decreases <em>t</em>, with the &#X201C;sweet spot&#X201D; around one-hundred (100) interns.</p><p>However, for larger, more serious business enterprises, the extra six (6) days of extra business activity could be an actionable justification for the expenditure required in maintaining a larger intern pool.</p><p>In conclusion, contrary to previous efforts, we have demonstrated that a complete unit testing suite for the x86 instruction set is a tractable problem, given the right assumptions.</p>
+<hr class="footnoterule"><dl class="thefootnotes"><dt class="dt-thefootnotes">
+<a id="note1" href="#text1">1</a></dt><dd class="dd-thefootnotes"><div class="footnotetext">David 2015</div></dd><dt class="dt-thefootnotes"><a id="note2" href="#text2">2</a></dt><dd class="dd-thefootnotes"><div class="footnotetext">Clarence 2015</div></dd></dl></p>
+
+<p><hr style="height:2"><blockquote class="quote"><em>This document was translated from L<sup>A</sup>T<sub>E</sub>X by
+</em><a href="http://hevea.inria.fr/index.html"><em>H</em><em><span style="font-size:small"><sup>E</sup></span></em><em>V</em><em><span style="font-size:small"><sup>E</sup></span></em><em>A</em></a><em>.</em></blockquote></body>
+</html></p>
