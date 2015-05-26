@@ -56,9 +56,9 @@ td p{margin:0px;}
 </title>
 </head>
 <body >
-<table class="title"><tr><td style="padding:1ex"><h1 class="titlemain">Brute Forcing Intel x86 Instruction Correctness Via Unit Testing and an Intern Pool</h1><h3 class="titlerest">m4b.github.io@gmail.com</h3></td></tr>
+<table class="title"><tr><td style="padding:1ex"><h1 class="titlemain">Brute Forcing Intel x86 Instruction Correctness Via Unit Testing and an Intern Pool</h1><h3 class="titlerest"><a href="mailto:m4b.github.io@gmail.com">m4b.github.io@gmail.com</a></h3></td></tr>
 </table><p>To begin, let <em>f(x)</em> be a function from the number of bytes to the number of possible binary sequences for that number of bytes:</p><table class="display dcenter"><tr style="vertical-align:middle"><td class="dcell">
-<span style="font-style:italic">f</span>(<span style="font-style:italic">x</span>)&#XA0;=&#XA0;2<sup>(8<em><span style="font-style:italic">x</span>)</sup>
+<span style="font-style:italic">f</span>(<span style="font-style:italic">x</span>)&#XA0;=&#XA0;2<sup>(8*<span style="font-style:italic">x</span>)</sup>
 &#XA0;&#XA0;&#XA0;&#XA0;(1)</td></tr>
 </table><p>Since the largest Intel instruction can be 15 bytes, and the shortest 1 byte, we have exactly:</p><table class="display dcenter"><tr style="vertical-align:middle"><td class="dcell">
 &#X3C9;&#XA0;=&#XA0;5.21265880699967<span style="font-style:italic">e</span>+33&#XA0;=&#XA0;</td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center">15</td></tr>
@@ -70,14 +70,14 @@ td p{margin:0px;}
 </td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center"><table class="display"><tr style="vertical-align:middle"><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center">15</td></tr>
 <tr><td class="dcell" style="text-align:center"><span style="font-size:xx-large">&#X2211;</span></td></tr>
 <tr><td class="dcell" style="text-align:center"><span style="font-style:italic">i</span>=1</td></tr>
-</table></td><td class="dcell"><span style="font-style:italic">f</span>(<span style="font-style:italic">i</span>)&#XA0;</em>&#XA0;<span style="font-style:italic">i</span>&#XA0;<em>&#XA0;(32+2)</td></tr>
+</table></td><td class="dcell"><span style="font-style:italic">f</span>(<span style="font-style:italic">i</span>)&#XA0;<em>&#XA0;<span style="font-style:italic">i</span>&#XA0;</em>&#XA0;(32+2)</td></tr>
 </table></td></tr>
 <tr><td class="hbar"></td></tr>
 <tr><td class="dcell" style="text-align:center">2</td></tr>
 </table></td><td class="dcell">
 &#XA0;&#XA0;&#XA0;&#XA0;(3)</td></tr>
 </table><p>where we add two (2) bytes for two (2) new lines in order to make the resulting text file more human readable.</p><p>Further, let us suppose we have already generated the binary sequences, <em>and</em> the new lines, which leaves only (&#X3C9; * 32)/2 bytes to be committed to disk, by our pool of interns, <em>p</em>.</p><p>Let us further suppose that they only commit correct expected values (or their employment will be promptly terminated, and they will <em>not</em> receive a letter of recommendation).</p><p>Furthermore, as can be expected from our harsh treatment, they are exceptionally efficient at their task, and after each timestep, commit two (2) times as many expected values to disk.</p><p>Their rate of work<sup><a id="text1" href="#note1">1</a></sup> , in bytes committed to disk, is therefore given by:</p><table class="display dcenter"><tr style="vertical-align:middle"><td class="dcell">
-<span style="font-style:italic">i</span>(<span style="font-style:italic">t</span>)&#XA0;=&#XA0;&#XA0;<span style="font-style:italic">p</span>&#XA0;</em>&#XA0;32&#XA0;<em>&#XA0;</td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center"><span style="font-style:italic">t</span></td></tr>
+<span style="font-style:italic">i</span>(<span style="font-style:italic">t</span>)&#XA0;=&#XA0;&#XA0;<span style="font-style:italic">p</span>&#XA0;<em>&#XA0;32&#XA0;</em>&#XA0;</td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center"><span style="font-style:italic">t</span></td></tr>
 <tr><td class="dcell" style="text-align:center"><span style="font-size:xx-large">&#X2211;</span></td></tr>
 <tr><td class="dcell" style="text-align:center"><span style="font-style:italic">k</span>=1</td></tr>
 </table></td><td class="dcell">&#XA0;2<sup>(<span style="font-style:italic">k</span>&#X2212;1)</sup>
@@ -85,7 +85,7 @@ td p{margin:0px;}
 </table><p>where <em>p</em> is the number of interns and <em>t</em> is a continuous multiplier for some unit of time &gt; 0.</p><p>As such, we wish to know what <em>t</em> equals when <span style="font-style:italic">i</span>(<span style="font-style:italic">t</span>) = (&#X3C9; * 32)/2</p><p>Simple algebra<sup><a id="text2" href="#note2">2</a></sup> gives us <em>t</em> as a function of <em>i</em>:</p><table class="display dcenter"><tr style="vertical-align:middle"><td class="dcell">
 <span style="font-style:italic">t</span>(<span style="font-style:italic">i</span>)&#XA0;=&#XA0;</td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center"><table class="display"><tr style="vertical-align:middle"><td class="dcell"><span style="font-style:italic">ln</span>&#XA0;(</td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center"><span style="font-style:italic">i</span></td></tr>
 <tr><td class="hbar"></td></tr>
-<tr><td class="dcell" style="text-align:center">(32&#XA0;</em>&#XA0;<span style="font-style:italic">p</span>)</td></tr>
+<tr><td class="dcell" style="text-align:center">(32&#XA0;<em>&#XA0;<span style="font-style:italic">p</span>)</td></tr>
 </table></td><td class="dcell">&#XA0;+&#XA0;1)</td></tr>
 </table></td></tr>
 <tr><td class="hbar"></td></tr>
@@ -94,7 +94,7 @@ td p{margin:0px;}
 </table><p>For the sake of argument, let us suppose our summer internship program had a successful recruiting session, and we yielded four (4) interns, hence <span style="font-style:italic">p</span> = 4 and therefore:
 </p><table class="display dcenter"><tr style="vertical-align:middle"><td class="dcell">
 </td><td class="dcell"><table class="display"><tr style="vertical-align:middle"><td class="dcell">
-<span style="font-style:italic">t</span>(&#X3C9;&#XA0;<em>&#XA0;16)=&#XA0;</td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center"><table class="display"><tr style="vertical-align:middle"><td class="dcell"><span style="font-style:italic">ln</span>&#XA0;(</td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center">&#X3C9;&#XA0;</em>&#XA0;16</td></tr>
+<span style="font-style:italic">t</span>(&#X3C9;&#XA0;</em>&#XA0;16)=&#XA0;</td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center"><table class="display"><tr style="vertical-align:middle"><td class="dcell"><span style="font-style:italic">ln</span>&#XA0;(</td><td class="dcell"><table class="display"><tr><td class="dcell" style="text-align:center">&#X3C9;&#XA0;*&#XA0;16</td></tr>
 <tr><td class="hbar"></td></tr>
 <tr><td class="dcell" style="text-align:center">32*4</td></tr>
 </table></td><td class="dcell">&#XA0;+&#XA0;1)</td></tr>

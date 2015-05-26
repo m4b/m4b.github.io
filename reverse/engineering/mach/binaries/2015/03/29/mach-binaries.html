@@ -21,7 +21,7 @@
 ">
 
   <link rel="stylesheet" href="/css/main.css">
-  <link rel="canonical" href="http://m4b.github.io.com/reverse/engineering/mach/binaries/2015/03/29/mach-binaries.html">
+  <link rel="canonical" href="http://www.m4b.io/reverse/engineering/mach/binaries/2015/03/29/mach-binaries.html">
 </head>
 
 
@@ -106,7 +106,7 @@
 
 <p>I&#39;m sure there are other resources, but they&#39;re usually old, or incomplete, or not detailed enough.  I couldn&#39;t find much, sorry.</p>
 
-<h2>Load Commands</h2>
+<h2 id="load-commands">Load Commands</h2>
 
 <p>So, after the mach header (which I won&#39;t detail here), a mach binary has a sequence of load commands.  A simple C program like:</p>
 <div class="highlight"><pre><code class="language-c" data-lang="c"><span class="cp">#include&lt;stdio.h&gt;</span>
@@ -176,7 +176,7 @@ Libraries (1)
 Exports (3)
 Imports (2)
 </code></pre></div>
-<h2>Libraries</h2>
+<h2 id="libraries">Libraries</h2>
 
 <p>OSX, for better or worse (better), uses a two-level namespace for resolving undefined symbol references (imports).  What that means is that imported symbols have a pointer to <em>which</em> library they&#39;re from; which is <em>awesome</em>.</p>
 
@@ -209,7 +209,7 @@ Imports (2)
 
 <p>You should probably read the Apple <a href="https://developer.apple.com/library/mac/documentation/DeveloperTools/Conceptual/DynamicLibraries/100-Articles/RunpathDependentLibraries.html">runpath dependent library documentation</a>, if you&#39;re more curious, because I always forget the exact details.</p>
 
-<h2>Symbols</h2>
+<h2 id="symbols">Symbols</h2>
 
 <p>All mach imported and exported symbol information is contained in the linkedit segment.</p>
 
@@ -218,7 +218,7 @@ Imports (2)
 <p>If you&#39;re curious, the first place you should head to is <code>/usr/lib/mach-o/loader.h</code> (once again) and find the <code>dyld_info_command</code> struct, where a comment like this (as of March 2015) awaits you:</p>
 
 <blockquote>
-<p>The dyld<em>info</em>command contains the file offsets and sizes of
+<p>The dyld_info_command contains the file offsets and sizes of
 the new compressed form of the information dyld needs to
 load the image.  This information is used by dyld on Mac OS X
 10.6 and later.  All information pointed to by this command
@@ -336,7 +336,7 @@ to interpret it.</p>
 
 <p>Mach exports and mach imports use a trie, and a finite state automaton, respectively, to compress their information.  Time to brush the dust off that old CS theory book.</p>
 
-<h3>Exports</h3>
+<h3 id="exports">Exports</h3>
 
 <p>Mach exports, or globally visible symbols, or things you can link against without error, or &quot;a subset of the things you are able to reference in a C header file&quot;, reside in the linkedit segment, in a data structure called a trie which you probably learned about in your CS Algorithms I class, and then promptly forgot.  </p>
 
@@ -411,7 +411,7 @@ to interpret it.</p>
 
 <p>Fortunately, we can still statically determine the symbols that <code>libtoc</code> exports by getting the exports offset from the <code>dyld_info_command</code> struct field, and walking the export trie.</p>
 
-<h4>Export Trie</h4>
+<h4 id="export-trie">Export Trie</h4>
 
 <p>Using <code>otool -l</code> and grepping through the output for <code>LC_DYLD_INFO_ONLY</code> to find the <code>export_off</code> value, I highly recommend opening up a hex editor (<code>M-x hexl-find-file</code> if you&#39;re cool), and jumping to that location in the binary.  Mine is 0x2000, yours will probably be different.</p>
 
@@ -522,7 +522,7 @@ to interpret it.</p>
 
 <p>Lastly, and <strong>very importantly</strong>, the <em>next</em> uleb128 after whatever type the symbol is (so, depending on the type, it could be several bytes or uleb&#39;s later, see point 2. in the mach trie summary), is the number of child branches.  In the case of &quot;kTOC_MAGICAL_FUN&quot;, the number is 0.  But, it doesn&#39;t have to be.  The node with terminal export information can also have children; a good example of this can be found in <code>/usr/lib/system/libsystem_c.dylib</code> with <code>_printf</code> and <code>_printf_l</code>, where the latter will be a child node containing the export information for <code>_printf</code>; don&#39;t terminate your loop (or recursion if you&#39;re awesome) when you encounter a &quot;terminal&quot; node, as strange as that sounds, because it might have children.</p>
 
-<h3>Imports</h3>
+<h3 id="imports">Imports</h3>
 
 <figure>
 <img src="/images/darwin_system_imports.png" alt="hiya"/>
@@ -550,15 +550,15 @@ to interpret it.</p>
 <blockquote>
 <p>Some C++ programs require dyld to unique symbols so that all
    images in the process use the same copy of some code/data.
-   This step is done after binding. The content of the weak<em>bind
-   info is an opcode stream like the bind</em>info.  But it is sorted
+   This step is done after binding. The content of the weak_bind
+   info is an opcode stream like the bind_info.  But it is sorted
    alphabetically by symbol name.  This enable dyld to walk
    all images with weak binding information in order and look
    for collisions.  If there are no collisions, dyld does
    no updating.  That means that some fixups are also encoded
-   in the bind<em>info.  For instance, all calls to &quot;operator new&quot;
+   in the bind_info.  For instance, all calls to &quot;operator new&quot;
    are first bound to libstdc++.dylib using the information
-   in bind</em>info.  Then if some image overrides operator new
+   in bind_info.  Then if some image overrides operator new
    that is detected when the weak_bind information is processed
    and the call to operator new is then rebound.</p>
 </blockquote>
@@ -608,7 +608,7 @@ toc_maximum: 3
 </code></pre></div>
 <p>If not, either my directions are wrong, or you didn&#39;t follow my directions (exclusive or).</p>
 
-<h4>Mach Import Bind FSA</h4>
+<h4 id="mach-import-bind-fsa">Mach Import Bind FSA</h4>
 
 <p>Now that we&#39;ve got a running mach-o binary with imports, we can run something like <code>otool -l | grep bind_</code> to get the import binding offsets.  My own program&#39;s output tells me:</p>
 <div class="highlight"><pre><code class="language-text" data-lang="text">( 4): DYLD_INFO_ONLY (0x80000022) 48
@@ -796,7 +796,7 @@ BIND_OPCODE_DONE -&gt; 0x0
 0x37 with  seg_index: 0 seg_offset: 0x0 lib_ordinal: 0 type: 1 flags: 0 special_dylib: 1
 End of opcode stream
 </code></pre></div>
-<h2>Coda</h2>
+<h2 id="coda">Coda</h2>
 
 <p>There&#39;s a lot more to talk about; rebase opcodes, estimating routine sizes, dependency graphs, unicode symbols, etc., etc.</p>
 

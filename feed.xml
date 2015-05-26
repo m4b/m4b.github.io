@@ -4,11 +4,316 @@
     <title>m4b mov</title>
     <description>An online electronic journal repository for various projects, topics, tutorials, and other such texts, usually dealing with programming languages, reverse engineering, CS theory, object/binary analysis, formal methods, formal logic, and maybe, sometimes, even philosophy
 </description>
-    <link>http://m4b.github.io.com/</link>
-    <atom:link href="http://m4b.github.io.com/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Sun, 24 May 2015 14:02:43 -0600</pubDate>
-    <lastBuildDate>Sun, 24 May 2015 14:02:43 -0600</lastBuildDate>
+    <link>http://www.m4b.io/</link>
+    <atom:link href="http://www.m4b.io/feed.xml" rel="self" type="application/rss+xml" />
+    <pubDate>Mon, 25 May 2015 23:02:36 -0600</pubDate>
+    <lastBuildDate>Mon, 25 May 2015 23:02:36 -0600</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
+    
+      <item>
+        <title>What is an ELF Export?</title>
+        <description>&lt;p&gt;&lt;img src=&quot;/images/rankin-bass-hobbit-elves.jpg&quot; alt=&quot;Some Elves marching off to kill things, like linux does&quot;&gt;&lt;/p&gt;
+
+&lt;p&gt;This an article on how one might define what an ELF &lt;em&gt;export&lt;/em&gt; is, and by way of relation, what an ELF import is.  To avoid confusion and consternation, it is only indirectly about ELF globally visible symbols, and other ELF specific mechanisms, although I believe the two are frequently conflated.  The latter is specific to the ELF binary format, whereas an &amp;quot;ELF export&amp;quot; is what I mean by the ELF format&amp;#39;s &lt;em&gt;expression&lt;/em&gt; of an exported symbol.&lt;/p&gt;
+
+&lt;p&gt;Multiple binary format containers express the concept of an exported symbol in different ways, but I think they all are approximating, in their own unique ways, two principles which I sketch later on, and the following.&lt;/p&gt;
+
+&lt;p&gt;Put simply, an export is a datum, such as an integer or a string, &lt;em&gt;or&lt;/em&gt; a sequence of instructions which execute in some predefined and semantically coherent manner - a routine, or a function - which is available for public use.  An exported symbol is therefore a name &lt;em&gt;pointing&lt;/em&gt; to either an integer or a string, or a function, and made available for use.  Calling anything else an export seems to me a failing of the binary format, typically because we have repurposed its existing mechanisms &lt;em&gt;because&lt;/em&gt; they failed us in expressing a new (or older) concept.&lt;/p&gt;
+
+&lt;p&gt;The C concept of &lt;code&gt;extern&lt;/code&gt; essentially implements this notion at the source level.&lt;/p&gt;
+
+&lt;p&gt;Similarly, an import is the dual or inverse of an export, and will have a similar characterization.&lt;/p&gt;
+
+&lt;p&gt;And it is this characterization of an &amp;quot;export&amp;quot; that I have in mind (and I&amp;#39;m pretty sure you do too) when I ask &amp;quot;What is an ELF export?&amp;quot;&lt;/p&gt;
+
+&lt;p&gt;The &lt;em&gt;casus belli&lt;/em&gt; of this article however is that I can&amp;#39;t seem to find anything on the internet &lt;em&gt;explicitly&lt;/em&gt; detailing or logically &lt;em&gt;defining&lt;/em&gt; what makes something an &lt;em&gt;ELF&lt;/em&gt; export or not (focusing on the ELF part).  &lt;a href=&quot;http://stackoverflow.com/questions/12666253/elf-imports-and-exports&quot;&gt;This answer&lt;/a&gt; says that if a symbol is &lt;em&gt;not&lt;/em&gt; &lt;code&gt;SHN_UNDEF&lt;/code&gt; then it&amp;#39;s &amp;quot;defined and exported&amp;quot;.  That&amp;#39;s the best I&amp;#39;ve seen, but it&amp;#39;s not correct.&lt;/p&gt;
+
+&lt;p&gt;Normally you &lt;a href=&quot;http://stackoverflow.com/questions/34732/how-do-i-list-the-symbols-in-a-so-file&quot;&gt;just&lt;/a&gt; see &lt;a href=&quot;http://stackoverflow.com/questions/6668434/names-of-source-shared-libraries-for-imported-symbols-in-elf-format&quot;&gt;people&lt;/a&gt; telling &lt;a href=&quot;http://stackoverflow.com/questions/10480657/import-names-in-elf-binary&quot;&gt;you&lt;/a&gt; to use &lt;code&gt;nm&lt;/code&gt; or &lt;code&gt;readelf&lt;/code&gt; to get the imports or exports, which isn&amp;#39;t an explanation, but a means (In the age of cargo culting, however, this distinction might not mean much).&lt;/p&gt;
+
+&lt;p&gt;According to this &lt;a href=&quot;http://www.skyfree.org/linux/references/ELF_Format.pdf&quot;&gt;somewhat official looking ELF specification&lt;/a&gt;:&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Global symbols are visible to all object files being combined.
+One file’s definition of a global symbol will satisfy another file’s
+undefined reference to the same global symbol. [1-18]&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;So there you have it.  Except I didn&amp;#39;t ask what a global symbol was; I asked what an ELF export was.  And as it turns out, even if we accept globalness as a definition, or non-&lt;code&gt;SHN_UNDEF&lt;/code&gt;ness as a definition, as most things are, it&amp;#39;s a &lt;em&gt;little&lt;/em&gt; more complicated than that.&lt;/p&gt;
+
+&lt;p&gt;If you want to go down the &lt;img class=&#39;emoji&#39; title=&#39;:rabbit:&#39; alt=&#39;:rabbit:&#39; src=&#39;https://assets.github.com/images/icons/emoji/unicode/1f430.png&#39; height=&#39;20&#39; width=&#39;20&#39; align=&#39;absmiddle&#39; /&gt; hole, then read on; otherwise just skip to the &lt;a href=&quot;#conclusion&quot;&gt;conclusion&lt;/a&gt;, where you&amp;#39;ll find what I consider a robust, logical definition of ELF imports and exports, as I characterized them above.&lt;/p&gt;
+
+&lt;h2 id=&quot;elf-exports&quot;&gt;ELF Exports&lt;/h2&gt;
+
+&lt;p&gt;Take a symbol like &lt;code&gt;GLIBC_2.2.5&lt;/code&gt; (yes, it&amp;#39;s a real symbol, take a peak inside of the &lt;code&gt;_DYNAMIC&lt;/code&gt; array in &lt;code&gt;/usr/lib/ld-linux-x86-64.so.2&lt;/code&gt;): it&amp;#39;s listed as a &lt;code&gt;GLOBAL&lt;/code&gt; &lt;code&gt;OBJECT&lt;/code&gt; with an &lt;code&gt;ABS&lt;/code&gt; shndx, and no address (this might actually make sense).&lt;/p&gt;
+
+&lt;p&gt;But if &amp;quot;all defined global symbols are exports&amp;quot;, then &lt;code&gt;GLIBC_2.2.5&lt;/code&gt; must be an exported symbol from &lt;code&gt;ld-linux-x86-64-so.2&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;If you answered yes, then you&amp;#39;d be wrong, because it&amp;#39;s definitely not defined in &lt;code&gt;ld-linux-x86-64-so.2&lt;/code&gt;, but rather in &lt;code&gt;libc.so.6&lt;/code&gt;.  So then our definition isn&amp;#39;t quite right, because strictly speaking, &lt;code&gt;GLIBC_2.2.5&lt;/code&gt; isn&amp;#39;t &lt;strong&gt;un&lt;/strong&gt;defined (&lt;code&gt;shndx = 0&lt;/code&gt;), so it&amp;#39;s a little more complicated than just &amp;quot;anything not undefined is exported and defined&amp;quot;.&lt;/p&gt;
+
+&lt;p&gt;So it must be an exported symbol in &lt;code&gt;libc.so.6&lt;/code&gt;.  Well, it occurs just exactly as it does in &lt;code&gt;ld-linux-x86-64-so.2&lt;/code&gt;, so who knows what to make of that.&lt;/p&gt;
+
+&lt;p&gt;Of course someone will lampoon me perhaps at this point, saying it&amp;#39;s a way of versioning the function calls using &lt;code&gt;VERNEED&lt;/code&gt; or &lt;code&gt;VERDAUX&lt;/code&gt; or something silly like that in the &lt;code&gt;_DYNAMIC&lt;/code&gt; array, etc. &lt;code&gt;memcpy&lt;/code&gt;, for example, is like this.  In my setup, as of this writing, my &lt;code&gt;libc.so.6&lt;/code&gt; defines two &lt;code&gt;memcpy&lt;/code&gt;&amp;#39;s, one for different versions of libc.&lt;/p&gt;
+
+&lt;p&gt;Which is fine; but it seems clear that &lt;code&gt;GLIBC_2.2.5&lt;/code&gt; isn&amp;#39;t really an exported symbol in the sense you or I typically mean, but has been kind of grafted on with the available ELF &lt;code&gt;#define&lt;/code&gt;s that we call types, and repurposed for those uses.  Which, as I said, is fine.&lt;/p&gt;
+
+&lt;p&gt;And I say it&amp;#39;s not in the sense you or I typically mean because I&amp;#39;m pretty sure if I monkey-patch a binary right now and import &lt;code&gt;GLIBC_2.2.5&lt;/code&gt;, &lt;em&gt;weird&lt;/em&gt; stuff&amp;#39;s going to happen.  More on this particular point a little later.&lt;/p&gt;
+
+&lt;p&gt;This is perhaps a corner case; and importantly, we should be able to write a program that takes a binary and outputs the exports for that binary.  In order words, the &amp;quot;services&amp;quot; it provides for all to use.&lt;/p&gt;
+
+&lt;p&gt;After all, some program has to be doing this (it&amp;#39;s actually called &lt;code&gt;ld-linux-x86-64.so.2&lt;/code&gt;, which is the default dynamic linker on (my) linux).&lt;/p&gt;
+
+&lt;p&gt;So in this export-printing program, we have to tell it exactly what an ELF export is: and now we can say that an ELF export is every symbol which is &lt;code&gt;GLOBAL&lt;/code&gt;, defined, and doesn&amp;#39;t have an empty (&lt;code&gt;0x0&lt;/code&gt;) address offset.&lt;/p&gt;
+
+&lt;p&gt;Well, that also doesn&amp;#39;t work; we actually need to count &lt;code&gt;WEAK&lt;/code&gt; symbols as exported symbols, like &lt;code&gt;vsnprintf&lt;/code&gt; and a host of other symbols in &lt;code&gt;libc.so.6&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Unfortunately, adding this to our criterion won&amp;#39;t work either; compile a crappy binary that increments &lt;code&gt;0xdeadbeef&lt;/code&gt; or something.  Now run something like &lt;code&gt;readelf --syms &amp;lt;your crappy binary&amp;gt;&lt;/code&gt;, and you&amp;#39;ll see a bunch of... defined &lt;code&gt;GLOBAL&lt;/code&gt; &lt;em&gt;and&lt;/em&gt; &lt;code&gt;WEAK&lt;/code&gt; symbols &lt;em&gt;with&lt;/em&gt; address offsets that are non-zero.&lt;/p&gt;
+
+&lt;p&gt;Since I&amp;#39;m pretty sure &lt;code&gt;_DYNAMIC&lt;/code&gt; isn&amp;#39;t exported by your binary (or &lt;code&gt;_edata&lt;/code&gt;, or the various other nlist symbols for use in debugging), otherwise the (linux) world might explode, this means our definition still isn&amp;#39;t right.  (Actually, this might be a future exercise, seeing what happens when a symbol named &lt;code&gt;_DYNAMIC&lt;/code&gt; is exported)&lt;/p&gt;
+
+&lt;p&gt;Which brings us to our &lt;em&gt;final revision&lt;/em&gt;: &lt;strong&gt;an ELF symbol is exported iff if it is (&lt;code&gt;GLOBAL&lt;/code&gt; &lt;em&gt;or&lt;/em&gt; &lt;code&gt;WEAK&lt;/code&gt;) &lt;em&gt;and&lt;/em&gt; is defined &lt;em&gt;and&lt;/em&gt; has a non-zero address &lt;em&gt;and&lt;/em&gt; has an entry in a &lt;code&gt;SYMTAB&lt;/code&gt; table in the &lt;code&gt;_DYNAMIC&lt;/code&gt; array&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;So there you have it.&lt;/p&gt;
+
+&lt;p&gt;Unfortunately, &lt;a href=&quot;h4des.org/blog/index.php?/archives/346-ELF-obfuscation-let-analysis-tools-show-wrong-external-symbol-calls.html&quot;&gt;as has been noted here&lt;/a&gt;, many programs mess this up.&lt;/p&gt;
+
+&lt;p&gt;If I run &lt;code&gt;nm -g /usr/lib/libz.so.1.2.8&lt;/code&gt; on archlinux, which as of this writing strips libz, &lt;code&gt;nm&lt;/code&gt; returns no symbols.  But I assure you, there&amp;#39;s &lt;em&gt;plenty&lt;/em&gt; of symbols exported by libz.  If you have the ability to install a package like &lt;code&gt;elfutils&lt;/code&gt;, &lt;code&gt;readelf --dyn-syms /usr/lib/libz.so.1.2.8&lt;/code&gt; will show you that.&lt;/p&gt;
+
+&lt;p&gt;Unfortunately, as the article above mentions, section headers are &lt;em&gt;also&lt;/em&gt; optional in ELF binaries, and you can &lt;code&gt;sstrip&lt;/code&gt; a binary or dynamic lib to really confuse some (looks like most?) of these programs.  For me, &lt;code&gt;sstrip&lt;/code&gt;ing (a copy) of libz and running the same command from above does not produce any symbols... ಠ_ಠ&lt;/p&gt;
+
+&lt;p&gt;While there is a lot of good information in the section headers and the symbol table/nlist if it&amp;#39;s avaialble, from a practical perspective (I&amp;#39;d also say logical/philosophical), &lt;em&gt;an exported symbol is &lt;strong&gt;at least&lt;/strong&gt; that which is visible to the dynamic linker&lt;/em&gt;; therefore, if a program which purporteldy outputs a program&amp;#39;s exports relies entirely on section headers, and not the &lt;code&gt;_DYNAMIC&lt;/code&gt; array, then it&amp;#39;s not really telling us what the exports are, because the dynamic linker &lt;em&gt;only&lt;/em&gt; cares about what&amp;#39;s in &lt;code&gt;_DYNAMIC&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;elf-imports&quot;&gt;ELF Imports&lt;/h2&gt;
+
+&lt;p&gt;So, I&amp;#39;m going to say something controversial about what an (any) export &lt;em&gt;is&lt;/em&gt;, and in doing so, introduce the &lt;em&gt;first recursive principle of imports and exports&lt;/em&gt;:&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;(1) &lt;strong&gt;an export is something that can be imported&lt;/strong&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;I think there&amp;#39;s something deeply mystical, mutually recursive, and satisfying about that, and I like it --- because now we need to start thinking about what an import is.  You might think that an ELF import is just every undefined symbol, like the stack overflow answer suggested.&lt;/p&gt;
+
+&lt;p&gt;That&amp;#39;s wrong too, unfortunately, at least technically speaking.  The first entry of every symbol table, if the binary is ELF API conforming, must be the &amp;quot;null&amp;quot; entry; as a result, there always exists at least one undefined, &lt;code&gt;LOCAL&lt;/code&gt; symbol, with no name.&lt;/p&gt;
+
+&lt;p&gt;Of course one might argue it&amp;#39;s still an import, which just sounds like they&amp;#39;re arguing it is an undefined symbol; and similarly, for exports, that they&amp;#39;re simply globally visible symbols.&lt;/p&gt;
+
+&lt;p&gt;But I think the philosophical crux of my point is that an import &lt;em&gt;isn&amp;#39;t just an undefined symbol&lt;/em&gt; and an export &lt;em&gt;isn&amp;#39;t just a globally visible symbol&lt;/em&gt; - they&amp;#39;re subject to (or should be) structured, &lt;em&gt;semantic&lt;/em&gt; constraints, and this characterization is something that mach-o binaries &lt;em&gt;really&lt;/em&gt; nailed, so much so that it&amp;#39;s a pleasure analyzing them.  See this long-winded analysis on &lt;a href=&quot;/reverse/engineering/mach/binaries/2015/03/29/mach-binaries.html&quot;&gt;mach-o binaries&lt;/a&gt; for how exports are very structured, constrained things (they only occur in the export trie); and how imports are very structured, constrained things (they only occur in the imports FSA).&lt;/p&gt;
+
+&lt;p&gt;To illustrate using a real example, and which is currently vexing me (maybe someone can send a nasty (or nice) email telling me what&amp;#39;s going on here), occasionally, you find undefined &lt;code&gt;NOTYPE&lt;/code&gt; &lt;code&gt;WEAK&lt;/code&gt; symbols in the &lt;code&gt;_DYNAMIC&lt;/code&gt; array.&lt;/p&gt;
+
+&lt;p&gt;As of this writing, in &lt;code&gt;libc.so.6&lt;/code&gt;, &lt;code&gt;_dl_starting_up&lt;/code&gt; is such a symbol.  The &lt;code&gt;_dl&lt;/code&gt; indicates it comes from the dynamic loader&amp;#39;s API, which &lt;code&gt;ld-linux-x86-64.so.2&lt;/code&gt; provides.&lt;/p&gt;
+
+&lt;p&gt;This is the API-qua-exports of linux&amp;#39;s dynamic linker:&lt;/p&gt;
+
+&lt;table&gt;&lt;thead&gt;
+&lt;tr&gt;
+&lt;th style=&quot;text-align: right&quot;&gt;Address Offset&lt;/th&gt;
+&lt;th style=&quot;text-align: right&quot;&gt;Symbol Name (Size)&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align: right&quot;&gt;8ce0&lt;/td&gt;
+&lt;td style=&quot;text-align: right&quot;&gt;&lt;code&gt;_dl_rtld_di_serinfo&lt;/code&gt; (535)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align: right&quot;&gt;fa00&lt;/td&gt;
+&lt;td style=&quot;text-align: right&quot;&gt;&lt;code&gt;_dl_debug_state&lt;/code&gt; (2)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align: right&quot;&gt;113d0&lt;/td&gt;
+&lt;td style=&quot;text-align: right&quot;&gt;&lt;code&gt;_dl_mcount&lt;/code&gt; (590)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align: right&quot;&gt;11d30&lt;/td&gt;
+&lt;td style=&quot;text-align: right&quot;&gt;&lt;code&gt;_dl_tls_setup&lt;/code&gt; (165)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align: right&quot;&gt;11de0&lt;/td&gt;
+&lt;td style=&quot;text-align: right&quot;&gt;&lt;code&gt;_dl_get_tls_static_info&lt;/code&gt; (21)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align: right&quot;&gt;11ea0&lt;/td&gt;
+&lt;td style=&quot;text-align: right&quot;&gt;&lt;code&gt;_dl_allocate_tls_init&lt;/code&gt; (621)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align: right&quot;&gt;12110&lt;/td&gt;
+&lt;td style=&quot;text-align: right&quot;&gt;&lt;code&gt;_dl_allocate_tls&lt;/code&gt; (49)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align: right&quot;&gt;12150&lt;/td&gt;
+&lt;td style=&quot;text-align: right&quot;&gt;&lt;code&gt;_dl_deallocate_tls&lt;/code&gt; (132)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align: right&quot;&gt;124a0&lt;/td&gt;
+&lt;td style=&quot;text-align: right&quot;&gt;&lt;code&gt;__tls_get_addr&lt;/code&gt; (63)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align: right&quot;&gt;128a0&lt;/td&gt;
+&lt;td style=&quot;text-align: right&quot;&gt;&lt;code&gt;_dl_make_stack_executable&lt;/code&gt; (136)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align: right&quot;&gt;13310&lt;/td&gt;
+&lt;td style=&quot;text-align: right&quot;&gt;&lt;code&gt;_dl_find_dso_for_object&lt;/code&gt; (177)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align: right&quot;&gt;16950&lt;/td&gt;
+&lt;td style=&quot;text-align: right&quot;&gt;&lt;code&gt;__libc_memalign&lt;/code&gt; (248)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align: right&quot;&gt;16a50&lt;/td&gt;
+&lt;td style=&quot;text-align: right&quot;&gt;&lt;code&gt;malloc&lt;/code&gt; (13)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align: right&quot;&gt;16a60&lt;/td&gt;
+&lt;td style=&quot;text-align: right&quot;&gt;&lt;code&gt;calloc&lt;/code&gt; (59)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align: right&quot;&gt;16aa0&lt;/td&gt;
+&lt;td style=&quot;text-align: right&quot;&gt;&lt;code&gt;free&lt;/code&gt; (46)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align: right&quot;&gt;16c10&lt;/td&gt;
+&lt;td style=&quot;text-align: right&quot;&gt;&lt;code&gt;realloc&lt;/code&gt; (138)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align: right&quot;&gt;21c40&lt;/td&gt;
+&lt;td style=&quot;text-align: right&quot;&gt;&lt;code&gt;_rtld_global_ro&lt;/code&gt; (296)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align: right&quot;&gt;21d78&lt;/td&gt;
+&lt;td style=&quot;text-align: right&quot;&gt;&lt;code&gt;_dl_argv&lt;/code&gt; (8)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align: right&quot;&gt;21de0&lt;/td&gt;
+&lt;td style=&quot;text-align: right&quot;&gt;&lt;code&gt;__libc_stack_end&lt;/code&gt; (8)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align: right&quot;&gt;21de8&lt;/td&gt;
+&lt;td style=&quot;text-align: right&quot;&gt;&lt;code&gt;__libc_enable_secure&lt;/code&gt; (4)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align: right&quot;&gt;22000&lt;/td&gt;
+&lt;td style=&quot;text-align: right&quot;&gt;&lt;code&gt;_rtld_global&lt;/code&gt; (3968)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&quot;text-align: right&quot;&gt;223100&lt;/td&gt;
+&lt;td style=&quot;text-align: right&quot;&gt;&lt;code&gt;_r_debug&lt;/code&gt; (40)&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;&lt;/table&gt;
+
+&lt;p&gt;Unfortunately, &lt;code&gt;_dl_starting_up&lt;/code&gt; is nowhere to be seen.  Lucky for us, &lt;code&gt;libc.so.6&lt;/code&gt; is executable - yea, you heard that right, we can run the libc dynamic library.  And if we can run it, then with some esoteric dynamic linking environment variable knowledge, we can force all those stupid lazily bound symbols to be more like ML and not Haskell, and bind on startup.&lt;/p&gt;
+
+&lt;p&gt;To wit, we can do something like:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;$ LD_BIND_NOW=1 LD_DEBUG=all /usr/lib/libc.so.6 2&amp;gt;&amp;amp;1 &amp;gt;/dev/null | grep -C 2 _dl_starting_up
+     22011: symbol=optind;  lookup in file=/usr/lib/libc.so.6 [0]
+     22011: binding file /usr/lib/libc.so.6 [0] to /usr/lib/libc.so.6 [0]: normal symbol `optind&amp;#39; [GLIBC_2.2.5]
+     22011: symbol=_dl_starting_up;  lookup in file=/usr/lib/libc.so.6 [0]
+     22011: symbol=_dl_starting_up;  lookup in file=/usr/lib/ld-linux-x86-64.so.2 [0]
+     22011: symbol=stdout;  lookup in file=/usr/lib/libc.so.6 [0]
+     22011: binding file /usr/lib/libc.so.6 [0] to /usr/lib/libc.so.6 [0]: normal symbol `stdout&amp;#39; [GLIBC_2.2.5]
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Unfortunately, what that tells us is that the symbol &lt;code&gt;_dl_starting_up&lt;/code&gt; was not bound, because it wasn&amp;#39;t found in &lt;code&gt;ld-linux-x86-64.so.2&lt;/code&gt;, because it&amp;#39;s not exported by that library.&lt;/p&gt;
+
+&lt;p&gt;And this is ok, because &lt;code&gt;_dl_starting_up&lt;/code&gt; is a weak symbol.  But then we need to ask ourselves: is it really an imported symbol if it doesn&amp;#39;t have a type, and isn&amp;#39;t exported by any library?  I&amp;#39;m sure it has some function (likely another repurposing hack because the binary format failed us), and I really am looking forward to an email explaining this bit of low-level arcana, but I think it illustrates my second recursive principle:&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;(2) &lt;strong&gt;All imported symbols must be exported from somewhere&lt;/strong&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;To put this a bit more formally: for all x, if x is an imported symbol, then there exists a y, such that y is a library and y exports x.&lt;/p&gt;
+
+&lt;p&gt;This may be a biconditional, I haven&amp;#39;t decided yet (if we remember our formal logic (doubtful?), this is only a &lt;em&gt;necessary&lt;/em&gt; condition for imported symbolhood, and not a &lt;em&gt;sufficient&lt;/em&gt; one).&lt;/p&gt;
+
+&lt;h2 id=&quot;conclusion&quot;&gt;Conclusion&lt;/h2&gt;
+
+&lt;p&gt;To conclude, given the richness of ELF and GNU/Linux visibility conditions, definedness, and symbol types, being an export, in my opinion, is more fuzzy than I&amp;#39;d like, especially compared to other binary container formats (e.g., mach).  But I think it is possible to give a set of logical constraints which approximate the characterization of an &amp;quot;exported symbol&amp;quot; I gave at the start.&lt;/p&gt;
+
+&lt;p&gt;As such, I embarked on a philosophical discussion of what it is to be an ELF export, and ended up with two &amp;quot;recursive&amp;quot; principles of import and exporthood; pragmatic C hackers and reverse engineers, if they&amp;#39;ve read this far, have probably gone apoplectic.  Sorry about that.&lt;/p&gt;
+
+&lt;p&gt;And unfortunately, performing a depth-first search of the internet only turned up dubious explanations or program suggestions for determining ELF exports and imports, whereas I wanted a logical &lt;em&gt;definition&lt;/em&gt;.&lt;/p&gt;
+
+&lt;p&gt;If you were like me, or you just need to write a program that prints what I&amp;#39;ll coin right now are the &lt;em&gt;semantically tenable logical exports&lt;/em&gt; (and imports) of an ELF binary, then I present to you, in all their pseudo logic glory:&lt;/p&gt;
+
+&lt;h4 id=&quot;-the-logical-elf-import-and-export-definitions-&quot;&gt;&lt;img class=&#39;emoji&#39; title=&#39;:trumpet:&#39; alt=&#39;:trumpet:&#39; src=&#39;https://assets.github.com/images/icons/emoji/unicode/1f3ba.png&#39; height=&#39;20&#39; width=&#39;20&#39; align=&#39;absmiddle&#39; /&gt; &lt;em&gt;The Logical ELF Import and Export Definitions&lt;/em&gt; &lt;img class=&#39;emoji&#39; title=&#39;:trumpet:&#39; alt=&#39;:trumpet:&#39; src=&#39;https://assets.github.com/images/icons/emoji/unicode/1f3ba.png&#39; height=&#39;20&#39; width=&#39;20&#39; align=&#39;absmiddle&#39; /&gt;&lt;/h4&gt;
+
+&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;A symbol x is an ELF export iff:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;x.st_value ≠ 0x0
+∧ x.st_shndex ≠ SHN_UNDEF
+∧ (x.st_bind = GLOBAL ∨ x.st_bind = WEAK)
+∧ (x.st_type = IFUNC ∨ x.st_type = FUNC ∨ x.st_type = OBJECT )
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;A symbol x is an ELF import iff:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;x.st_value = 0x0
+∧ (x.st_bind = GLOBAL ∨ x.st_bind = WEAK)   
+∧ x.st_shndex = SHN_UNDEF
+∧ x.st_name ≠ 0
+∧ (x.st_type = IFUNC ∨ x.st_type = FUNC ∨ x.st_type = OBJECT )
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h1 id=&quot;appendix&quot;&gt;Appendix&lt;/h1&gt;
+
+&lt;h3 id=&quot;a&quot;&gt;A&lt;/h3&gt;
+
+&lt;h4 id=&quot;elf-type-conditions-in-logical-import-and-export-definitions&quot;&gt;ELF Type Conditions in Logical Import and Export Definitions&lt;/h4&gt;
+
+&lt;p&gt;So the final condition in the logical ELF import and export definitions is &lt;code&gt;(x.st_type = IFUNC ∨ x.st_type = FUNC ∨ x.st_type = OBJECT )&lt;/code&gt;, which might be too strict for some.&lt;/p&gt;
+
+&lt;p&gt;This is a reasonable concern; for example, many binaries import &lt;code&gt;_Jv_RegisterClasses&lt;/code&gt; which has &lt;code&gt;NOTYPE&lt;/code&gt;, &lt;code&gt;GLOBAL&lt;/code&gt;, an undefined &lt;code&gt;shndx&lt;/code&gt; and a zero address.  This symbol even has exporting libraries: &lt;code&gt;/usr/lib/libgcj_bc.so&lt;/code&gt; and &lt;code&gt;/usr/lib/libgcj.so.15.0.0&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;If it weren&amp;#39;t for the &lt;code&gt;NOTYPE&lt;/code&gt; it would qualify as an import, &lt;em&gt;and&lt;/em&gt; have the bonus of satisfying the recursive principles.&lt;/p&gt;
+
+&lt;p&gt;Interestingly, unlike something like &lt;code&gt;__gmon_start__&lt;/code&gt;, which is exported nowhere, this symbol (despite to the contrary what its &lt;code&gt;st_type&lt;/code&gt; says) actually &lt;em&gt;is&lt;/em&gt; a function, &lt;em&gt;and&lt;/em&gt; which satisfies the logical definition of an ELF export: it is a &lt;code&gt;FUNC&lt;/code&gt;, it&amp;#39;s &lt;code&gt;GLOBAL&lt;/code&gt;, is defined, and has an address.&lt;/p&gt;
+
+&lt;p&gt;Disassembling gives the added bonus of coherent instruction sequences.  E.g., for me, at offset &lt;code&gt;0x1320&lt;/code&gt; in &lt;code&gt;/usr/lib/libgcj_bc.so&lt;/code&gt; we have:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-asm&quot; data-lang=&quot;asm&quot;&gt;    &lt;span class=&quot;na&quot;&gt;.text&lt;/span&gt;
+    &lt;span class=&quot;nf&quot;&gt;subq&lt;/span&gt;    &lt;span class=&quot;no&quot;&gt;$8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;%rsp&lt;/span&gt;
+    &lt;span class=&quot;nf&quot;&gt;xorl&lt;/span&gt;    &lt;span class=&quot;nv&quot;&gt;%eax&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;%eax&lt;/span&gt;
+    &lt;span class=&quot;nf&quot;&gt;callq&lt;/span&gt;   &lt;span class=&quot;p&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;395&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;This could be an oversight/bug in the compiler, and it&amp;#39;s &lt;code&gt;st_type&lt;/code&gt; really should be &lt;code&gt;FUNC&lt;/code&gt; - it&amp;#39;s hard to say.&lt;/p&gt;
+
+&lt;p&gt;But in the case of something like &lt;code&gt;__gmon_start__&lt;/code&gt;, which is used by &lt;code&gt;/usr/bin/gprof&lt;/code&gt; (but isn&amp;#39;t exported by that binary), the case for it&amp;#39;s not really being an import is more reasonable - so different &lt;code&gt;NOTYPE&lt;/code&gt; &lt;code&gt;GLOBAL&lt;/code&gt; undefined zero-address symbols seem to have different behavior.&lt;/p&gt;
+
+&lt;p&gt;As such, for practical reasons, it might be prudent to let the last clause in the logical ELF import and export definition be optional, for unusual cases like this (depending on your use case).&lt;/p&gt;
+
+&lt;p&gt;In the end, you&amp;#39;re free to do whatever you want.  Just don&amp;#39;t hurt anybody!&lt;/p&gt;
+
+&lt;h3 id=&quot;b&quot;&gt;B&lt;/h3&gt;
+
+&lt;h4 id=&quot;_dl_starting_up&quot;&gt;&lt;code&gt;_dl_starting_up&lt;/code&gt;&lt;/h4&gt;
+
+&lt;p&gt;For the curious, we can actually find the symbol reference in the &lt;code&gt;rtld.c&lt;/code&gt; source code, beginning at line 110:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;cp&quot;&gt;#ifndef HAVE_INLINED_SYSCALLS&lt;/span&gt;
+&lt;span class=&quot;cm&quot;&gt;/* Set nonzero during loading and initialization of executable and&lt;/span&gt;
+&lt;span class=&quot;cm&quot;&gt;   libraries, cleared before the executable&amp;#39;s entry point runs.  This&lt;/span&gt;
+&lt;span class=&quot;cm&quot;&gt;   must not be initialized to nonzero, because the unused dynamic&lt;/span&gt;
+&lt;span class=&quot;cm&quot;&gt;   linker loaded in for libc.so&amp;#39;s &amp;quot;ld.so.1&amp;quot; dep will provide the&lt;/span&gt;
+&lt;span class=&quot;cm&quot;&gt;   definition seen by libc.so&amp;#39;s initializer; that value must be zero,&lt;/span&gt;
+&lt;span class=&quot;cm&quot;&gt;   and will be since that dynamic linker&amp;#39;s _dl_start and dl_main will&lt;/span&gt;
+&lt;span class=&quot;cm&quot;&gt;   never be called.  */&lt;/span&gt;
+&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;_dl_starting_up&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;rtld_hidden_def&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;_dl_starting_up&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;cp&quot;&gt;#endif&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;According to this obtuse piece of documentation, I should be able to inspect &lt;code&gt;_dl_starting_up&lt;/code&gt; in a debugger; if I mess around with this or figure out what&amp;#39;s going on, I&amp;#39;ll post back here.&lt;/p&gt;
+
+&lt;p&gt;Or again, someone well versed in this weirdness can enlighten me through email, and I&amp;#39;ll put &lt;em&gt;their&lt;/em&gt; answer here.&lt;/p&gt;
+</description>
+        <pubDate>Mon, 25 May 2015 00:00:00 -0600</pubDate>
+        <link>http://www.m4b.io/elf/export/binary/analysis/2015/05/25/what-is-an-elf-export.html</link>
+        <guid isPermaLink="true">http://www.m4b.io/elf/export/binary/analysis/2015/05/25/what-is-an-elf-export.html</guid>
+        
+        
+        <category>elf</category>
+        
+        <category>export</category>
+        
+        <category>binary</category>
+        
+        <category>analysis</category>
+        
+      </item>
     
       <item>
         <title>Brute Forcing Intel x86 Instruction Correctness Via Unit Testing and an Intern Pool</title>
@@ -70,9 +375,9 @@ td p{margin:0px;}
 &lt;/title&gt;
 &lt;/head&gt;
 &lt;body &gt;
-&lt;table class=&quot;title&quot;&gt;&lt;tr&gt;&lt;td style=&quot;padding:1ex&quot;&gt;&lt;h1 class=&quot;titlemain&quot;&gt;Brute Forcing Intel x86 Instruction Correctness Via Unit Testing and an Intern Pool&lt;/h1&gt;&lt;h3 class=&quot;titlerest&quot;&gt;m4b.github.io@gmail.com&lt;/h3&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;table class=&quot;title&quot;&gt;&lt;tr&gt;&lt;td style=&quot;padding:1ex&quot;&gt;&lt;h1 class=&quot;titlemain&quot;&gt;Brute Forcing Intel x86 Instruction Correctness Via Unit Testing and an Intern Pool&lt;/h1&gt;&lt;h3 class=&quot;titlerest&quot;&gt;&lt;a href=&quot;mailto:m4b.github.io@gmail.com&quot;&gt;m4b.github.io@gmail.com&lt;/a&gt;&lt;/h3&gt;&lt;/td&gt;&lt;/tr&gt;
 &lt;/table&gt;&lt;p&gt;To begin, let &lt;em&gt;f(x)&lt;/em&gt; be a function from the number of bytes to the number of possible binary sequences for that number of bytes:&lt;/p&gt;&lt;table class=&quot;display dcenter&quot;&gt;&lt;tr style=&quot;vertical-align:middle&quot;&gt;&lt;td class=&quot;dcell&quot;&gt;
-&lt;span style=&quot;font-style:italic&quot;&gt;f&lt;/span&gt;(&lt;span style=&quot;font-style:italic&quot;&gt;x&lt;/span&gt;)&amp;#XA0;=&amp;#XA0;2&lt;sup&gt;(8&lt;em&gt;&lt;span style=&quot;font-style:italic&quot;&gt;x&lt;/span&gt;)&lt;/sup&gt;
+&lt;span style=&quot;font-style:italic&quot;&gt;f&lt;/span&gt;(&lt;span style=&quot;font-style:italic&quot;&gt;x&lt;/span&gt;)&amp;#XA0;=&amp;#XA0;2&lt;sup&gt;(8*&lt;span style=&quot;font-style:italic&quot;&gt;x&lt;/span&gt;)&lt;/sup&gt;
 &amp;#XA0;&amp;#XA0;&amp;#XA0;&amp;#XA0;(1)&lt;/td&gt;&lt;/tr&gt;
 &lt;/table&gt;&lt;p&gt;Since the largest Intel instruction can be 15 bytes, and the shortest 1 byte, we have exactly:&lt;/p&gt;&lt;table class=&quot;display dcenter&quot;&gt;&lt;tr style=&quot;vertical-align:middle&quot;&gt;&lt;td class=&quot;dcell&quot;&gt;
 &amp;#X3C9;&amp;#XA0;=&amp;#XA0;5.21265880699967&lt;span style=&quot;font-style:italic&quot;&gt;e&lt;/span&gt;+33&amp;#XA0;=&amp;#XA0;&lt;/td&gt;&lt;td class=&quot;dcell&quot;&gt;&lt;table class=&quot;display&quot;&gt;&lt;tr&gt;&lt;td class=&quot;dcell&quot; style=&quot;text-align:center&quot;&gt;15&lt;/td&gt;&lt;/tr&gt;
@@ -84,14 +389,14 @@ td p{margin:0px;}
 &lt;/td&gt;&lt;td class=&quot;dcell&quot;&gt;&lt;table class=&quot;display&quot;&gt;&lt;tr&gt;&lt;td class=&quot;dcell&quot; style=&quot;text-align:center&quot;&gt;&lt;table class=&quot;display&quot;&gt;&lt;tr style=&quot;vertical-align:middle&quot;&gt;&lt;td class=&quot;dcell&quot;&gt;&lt;table class=&quot;display&quot;&gt;&lt;tr&gt;&lt;td class=&quot;dcell&quot; style=&quot;text-align:center&quot;&gt;15&lt;/td&gt;&lt;/tr&gt;
 &lt;tr&gt;&lt;td class=&quot;dcell&quot; style=&quot;text-align:center&quot;&gt;&lt;span style=&quot;font-size:xx-large&quot;&gt;&amp;#X2211;&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 &lt;tr&gt;&lt;td class=&quot;dcell&quot; style=&quot;text-align:center&quot;&gt;&lt;span style=&quot;font-style:italic&quot;&gt;i&lt;/span&gt;=1&lt;/td&gt;&lt;/tr&gt;
-&lt;/table&gt;&lt;/td&gt;&lt;td class=&quot;dcell&quot;&gt;&lt;span style=&quot;font-style:italic&quot;&gt;f&lt;/span&gt;(&lt;span style=&quot;font-style:italic&quot;&gt;i&lt;/span&gt;)&amp;#XA0;&lt;/em&gt;&amp;#XA0;&lt;span style=&quot;font-style:italic&quot;&gt;i&lt;/span&gt;&amp;#XA0;&lt;em&gt;&amp;#XA0;(32+2)&lt;/td&gt;&lt;/tr&gt;
+&lt;/table&gt;&lt;/td&gt;&lt;td class=&quot;dcell&quot;&gt;&lt;span style=&quot;font-style:italic&quot;&gt;f&lt;/span&gt;(&lt;span style=&quot;font-style:italic&quot;&gt;i&lt;/span&gt;)&amp;#XA0;&lt;em&gt;&amp;#XA0;&lt;span style=&quot;font-style:italic&quot;&gt;i&lt;/span&gt;&amp;#XA0;&lt;/em&gt;&amp;#XA0;(32+2)&lt;/td&gt;&lt;/tr&gt;
 &lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
 &lt;tr&gt;&lt;td class=&quot;hbar&quot;&gt;&lt;/td&gt;&lt;/tr&gt;
 &lt;tr&gt;&lt;td class=&quot;dcell&quot; style=&quot;text-align:center&quot;&gt;2&lt;/td&gt;&lt;/tr&gt;
 &lt;/table&gt;&lt;/td&gt;&lt;td class=&quot;dcell&quot;&gt;
 &amp;#XA0;&amp;#XA0;&amp;#XA0;&amp;#XA0;(3)&lt;/td&gt;&lt;/tr&gt;
 &lt;/table&gt;&lt;p&gt;where we add two (2) bytes for two (2) new lines in order to make the resulting text file more human readable.&lt;/p&gt;&lt;p&gt;Further, let us suppose we have already generated the binary sequences, &lt;em&gt;and&lt;/em&gt; the new lines, which leaves only (&amp;#X3C9; * 32)/2 bytes to be committed to disk, by our pool of interns, &lt;em&gt;p&lt;/em&gt;.&lt;/p&gt;&lt;p&gt;Let us further suppose that they only commit correct expected values (or their employment will be promptly terminated, and they will &lt;em&gt;not&lt;/em&gt; receive a letter of recommendation).&lt;/p&gt;&lt;p&gt;Furthermore, as can be expected from our harsh treatment, they are exceptionally efficient at their task, and after each timestep, commit two (2) times as many expected values to disk.&lt;/p&gt;&lt;p&gt;Their rate of work&lt;sup&gt;&lt;a id=&quot;text1&quot; href=&quot;#note1&quot;&gt;1&lt;/a&gt;&lt;/sup&gt; , in bytes committed to disk, is therefore given by:&lt;/p&gt;&lt;table class=&quot;display dcenter&quot;&gt;&lt;tr style=&quot;vertical-align:middle&quot;&gt;&lt;td class=&quot;dcell&quot;&gt;
-&lt;span style=&quot;font-style:italic&quot;&gt;i&lt;/span&gt;(&lt;span style=&quot;font-style:italic&quot;&gt;t&lt;/span&gt;)&amp;#XA0;=&amp;#XA0;&amp;#XA0;&lt;span style=&quot;font-style:italic&quot;&gt;p&lt;/span&gt;&amp;#XA0;&lt;/em&gt;&amp;#XA0;32&amp;#XA0;&lt;em&gt;&amp;#XA0;&lt;/td&gt;&lt;td class=&quot;dcell&quot;&gt;&lt;table class=&quot;display&quot;&gt;&lt;tr&gt;&lt;td class=&quot;dcell&quot; style=&quot;text-align:center&quot;&gt;&lt;span style=&quot;font-style:italic&quot;&gt;t&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;span style=&quot;font-style:italic&quot;&gt;i&lt;/span&gt;(&lt;span style=&quot;font-style:italic&quot;&gt;t&lt;/span&gt;)&amp;#XA0;=&amp;#XA0;&amp;#XA0;&lt;span style=&quot;font-style:italic&quot;&gt;p&lt;/span&gt;&amp;#XA0;&lt;em&gt;&amp;#XA0;32&amp;#XA0;&lt;/em&gt;&amp;#XA0;&lt;/td&gt;&lt;td class=&quot;dcell&quot;&gt;&lt;table class=&quot;display&quot;&gt;&lt;tr&gt;&lt;td class=&quot;dcell&quot; style=&quot;text-align:center&quot;&gt;&lt;span style=&quot;font-style:italic&quot;&gt;t&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 &lt;tr&gt;&lt;td class=&quot;dcell&quot; style=&quot;text-align:center&quot;&gt;&lt;span style=&quot;font-size:xx-large&quot;&gt;&amp;#X2211;&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 &lt;tr&gt;&lt;td class=&quot;dcell&quot; style=&quot;text-align:center&quot;&gt;&lt;span style=&quot;font-style:italic&quot;&gt;k&lt;/span&gt;=1&lt;/td&gt;&lt;/tr&gt;
 &lt;/table&gt;&lt;/td&gt;&lt;td class=&quot;dcell&quot;&gt;&amp;#XA0;2&lt;sup&gt;(&lt;span style=&quot;font-style:italic&quot;&gt;k&lt;/span&gt;&amp;#X2212;1)&lt;/sup&gt;
@@ -99,7 +404,7 @@ td p{margin:0px;}
 &lt;/table&gt;&lt;p&gt;where &lt;em&gt;p&lt;/em&gt; is the number of interns and &lt;em&gt;t&lt;/em&gt; is a continuous multiplier for some unit of time &amp;gt; 0.&lt;/p&gt;&lt;p&gt;As such, we wish to know what &lt;em&gt;t&lt;/em&gt; equals when &lt;span style=&quot;font-style:italic&quot;&gt;i&lt;/span&gt;(&lt;span style=&quot;font-style:italic&quot;&gt;t&lt;/span&gt;) = (&amp;#X3C9; * 32)/2&lt;/p&gt;&lt;p&gt;Simple algebra&lt;sup&gt;&lt;a id=&quot;text2&quot; href=&quot;#note2&quot;&gt;2&lt;/a&gt;&lt;/sup&gt; gives us &lt;em&gt;t&lt;/em&gt; as a function of &lt;em&gt;i&lt;/em&gt;:&lt;/p&gt;&lt;table class=&quot;display dcenter&quot;&gt;&lt;tr style=&quot;vertical-align:middle&quot;&gt;&lt;td class=&quot;dcell&quot;&gt;
 &lt;span style=&quot;font-style:italic&quot;&gt;t&lt;/span&gt;(&lt;span style=&quot;font-style:italic&quot;&gt;i&lt;/span&gt;)&amp;#XA0;=&amp;#XA0;&lt;/td&gt;&lt;td class=&quot;dcell&quot;&gt;&lt;table class=&quot;display&quot;&gt;&lt;tr&gt;&lt;td class=&quot;dcell&quot; style=&quot;text-align:center&quot;&gt;&lt;table class=&quot;display&quot;&gt;&lt;tr style=&quot;vertical-align:middle&quot;&gt;&lt;td class=&quot;dcell&quot;&gt;&lt;span style=&quot;font-style:italic&quot;&gt;ln&lt;/span&gt;&amp;#XA0;(&lt;/td&gt;&lt;td class=&quot;dcell&quot;&gt;&lt;table class=&quot;display&quot;&gt;&lt;tr&gt;&lt;td class=&quot;dcell&quot; style=&quot;text-align:center&quot;&gt;&lt;span style=&quot;font-style:italic&quot;&gt;i&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
 &lt;tr&gt;&lt;td class=&quot;hbar&quot;&gt;&lt;/td&gt;&lt;/tr&gt;
-&lt;tr&gt;&lt;td class=&quot;dcell&quot; style=&quot;text-align:center&quot;&gt;(32&amp;#XA0;&lt;/em&gt;&amp;#XA0;&lt;span style=&quot;font-style:italic&quot;&gt;p&lt;/span&gt;)&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td class=&quot;dcell&quot; style=&quot;text-align:center&quot;&gt;(32&amp;#XA0;&lt;em&gt;&amp;#XA0;&lt;span style=&quot;font-style:italic&quot;&gt;p&lt;/span&gt;)&lt;/td&gt;&lt;/tr&gt;
 &lt;/table&gt;&lt;/td&gt;&lt;td class=&quot;dcell&quot;&gt;&amp;#XA0;+&amp;#XA0;1)&lt;/td&gt;&lt;/tr&gt;
 &lt;/table&gt;&lt;/td&gt;&lt;/tr&gt;
 &lt;tr&gt;&lt;td class=&quot;hbar&quot;&gt;&lt;/td&gt;&lt;/tr&gt;
@@ -108,7 +413,7 @@ td p{margin:0px;}
 &lt;/table&gt;&lt;p&gt;For the sake of argument, let us suppose our summer internship program had a successful recruiting session, and we yielded four (4) interns, hence &lt;span style=&quot;font-style:italic&quot;&gt;p&lt;/span&gt; = 4 and therefore:
 &lt;/p&gt;&lt;table class=&quot;display dcenter&quot;&gt;&lt;tr style=&quot;vertical-align:middle&quot;&gt;&lt;td class=&quot;dcell&quot;&gt;
 &lt;/td&gt;&lt;td class=&quot;dcell&quot;&gt;&lt;table class=&quot;display&quot;&gt;&lt;tr style=&quot;vertical-align:middle&quot;&gt;&lt;td class=&quot;dcell&quot;&gt;
-&lt;span style=&quot;font-style:italic&quot;&gt;t&lt;/span&gt;(&amp;#X3C9;&amp;#XA0;&lt;em&gt;&amp;#XA0;16)=&amp;#XA0;&lt;/td&gt;&lt;td class=&quot;dcell&quot;&gt;&lt;table class=&quot;display&quot;&gt;&lt;tr&gt;&lt;td class=&quot;dcell&quot; style=&quot;text-align:center&quot;&gt;&lt;table class=&quot;display&quot;&gt;&lt;tr style=&quot;vertical-align:middle&quot;&gt;&lt;td class=&quot;dcell&quot;&gt;&lt;span style=&quot;font-style:italic&quot;&gt;ln&lt;/span&gt;&amp;#XA0;(&lt;/td&gt;&lt;td class=&quot;dcell&quot;&gt;&lt;table class=&quot;display&quot;&gt;&lt;tr&gt;&lt;td class=&quot;dcell&quot; style=&quot;text-align:center&quot;&gt;&amp;#X3C9;&amp;#XA0;&lt;/em&gt;&amp;#XA0;16&lt;/td&gt;&lt;/tr&gt;
+&lt;span style=&quot;font-style:italic&quot;&gt;t&lt;/span&gt;(&amp;#X3C9;&amp;#XA0;&lt;/em&gt;&amp;#XA0;16)=&amp;#XA0;&lt;/td&gt;&lt;td class=&quot;dcell&quot;&gt;&lt;table class=&quot;display&quot;&gt;&lt;tr&gt;&lt;td class=&quot;dcell&quot; style=&quot;text-align:center&quot;&gt;&lt;table class=&quot;display&quot;&gt;&lt;tr style=&quot;vertical-align:middle&quot;&gt;&lt;td class=&quot;dcell&quot;&gt;&lt;span style=&quot;font-style:italic&quot;&gt;ln&lt;/span&gt;&amp;#XA0;(&lt;/td&gt;&lt;td class=&quot;dcell&quot;&gt;&lt;table class=&quot;display&quot;&gt;&lt;tr&gt;&lt;td class=&quot;dcell&quot; style=&quot;text-align:center&quot;&gt;&amp;#X3C9;&amp;#XA0;*&amp;#XA0;16&lt;/td&gt;&lt;/tr&gt;
 &lt;tr&gt;&lt;td class=&quot;hbar&quot;&gt;&lt;/td&gt;&lt;/tr&gt;
 &lt;tr&gt;&lt;td class=&quot;dcell&quot; style=&quot;text-align:center&quot;&gt;32*4&lt;/td&gt;&lt;/tr&gt;
 &lt;/table&gt;&lt;/td&gt;&lt;td class=&quot;dcell&quot;&gt;&amp;#XA0;+&amp;#XA0;1)&lt;/td&gt;&lt;/tr&gt;
@@ -142,8 +447,8 @@ td p{margin:0px;}
 &lt;/html&gt;&lt;/p&gt;
 </description>
         <pubDate>Sat, 23 May 2015 00:00:00 -0600</pubDate>
-        <link>http://m4b.github.io.com/theory/x86/unit/test/2015/05/23/brute-forcing-intel-x86-instruction-correctness.html</link>
-        <guid isPermaLink="true">http://m4b.github.io.com/theory/x86/unit/test/2015/05/23/brute-forcing-intel-x86-instruction-correctness.html</guid>
+        <link>http://www.m4b.io/theory/x86/unit/test/2015/05/23/brute-forcing-intel-x86-instruction-correctness.html</link>
+        <guid isPermaLink="true">http://www.m4b.io/theory/x86/unit/test/2015/05/23/brute-forcing-intel-x86-instruction-correctness.html</guid>
         
         
         <category>theory</category>
@@ -189,7 +494,7 @@ td p{margin:0px;}
 
 &lt;p&gt;I&amp;#39;m sure there are other resources, but they&amp;#39;re usually old, or incomplete, or not detailed enough.  I couldn&amp;#39;t find much, sorry.&lt;/p&gt;
 
-&lt;h2&gt;Load Commands&lt;/h2&gt;
+&lt;h2 id=&quot;load-commands&quot;&gt;Load Commands&lt;/h2&gt;
 
 &lt;p&gt;So, after the mach header (which I won&amp;#39;t detail here), a mach binary has a sequence of load commands.  A simple C program like:&lt;/p&gt;
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;cp&quot;&gt;#include&amp;lt;stdio.h&amp;gt;&lt;/span&gt;
@@ -259,7 +564,7 @@ Libraries (1)
 Exports (3)
 Imports (2)
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;h2&gt;Libraries&lt;/h2&gt;
+&lt;h2 id=&quot;libraries&quot;&gt;Libraries&lt;/h2&gt;
 
 &lt;p&gt;OSX, for better or worse (better), uses a two-level namespace for resolving undefined symbol references (imports).  What that means is that imported symbols have a pointer to &lt;em&gt;which&lt;/em&gt; library they&amp;#39;re from; which is &lt;em&gt;awesome&lt;/em&gt;.&lt;/p&gt;
 
@@ -292,7 +597,7 @@ Imports (2)
 
 &lt;p&gt;You should probably read the Apple &lt;a href=&quot;https://developer.apple.com/library/mac/documentation/DeveloperTools/Conceptual/DynamicLibraries/100-Articles/RunpathDependentLibraries.html&quot;&gt;runpath dependent library documentation&lt;/a&gt;, if you&amp;#39;re more curious, because I always forget the exact details.&lt;/p&gt;
 
-&lt;h2&gt;Symbols&lt;/h2&gt;
+&lt;h2 id=&quot;symbols&quot;&gt;Symbols&lt;/h2&gt;
 
 &lt;p&gt;All mach imported and exported symbol information is contained in the linkedit segment.&lt;/p&gt;
 
@@ -301,7 +606,7 @@ Imports (2)
 &lt;p&gt;If you&amp;#39;re curious, the first place you should head to is &lt;code&gt;/usr/lib/mach-o/loader.h&lt;/code&gt; (once again) and find the &lt;code&gt;dyld_info_command&lt;/code&gt; struct, where a comment like this (as of March 2015) awaits you:&lt;/p&gt;
 
 &lt;blockquote&gt;
-&lt;p&gt;The dyld&lt;em&gt;info&lt;/em&gt;command contains the file offsets and sizes of
+&lt;p&gt;The dyld_info_command contains the file offsets and sizes of
 the new compressed form of the information dyld needs to
 load the image.  This information is used by dyld on Mac OS X
 10.6 and later.  All information pointed to by this command
@@ -419,7 +724,7 @@ to interpret it.&lt;/p&gt;
 
 &lt;p&gt;Mach exports and mach imports use a trie, and a finite state automaton, respectively, to compress their information.  Time to brush the dust off that old CS theory book.&lt;/p&gt;
 
-&lt;h3&gt;Exports&lt;/h3&gt;
+&lt;h3 id=&quot;exports&quot;&gt;Exports&lt;/h3&gt;
 
 &lt;p&gt;Mach exports, or globally visible symbols, or things you can link against without error, or &amp;quot;a subset of the things you are able to reference in a C header file&amp;quot;, reside in the linkedit segment, in a data structure called a trie which you probably learned about in your CS Algorithms I class, and then promptly forgot.  &lt;/p&gt;
 
@@ -494,7 +799,7 @@ to interpret it.&lt;/p&gt;
 
 &lt;p&gt;Fortunately, we can still statically determine the symbols that &lt;code&gt;libtoc&lt;/code&gt; exports by getting the exports offset from the &lt;code&gt;dyld_info_command&lt;/code&gt; struct field, and walking the export trie.&lt;/p&gt;
 
-&lt;h4&gt;Export Trie&lt;/h4&gt;
+&lt;h4 id=&quot;export-trie&quot;&gt;Export Trie&lt;/h4&gt;
 
 &lt;p&gt;Using &lt;code&gt;otool -l&lt;/code&gt; and grepping through the output for &lt;code&gt;LC_DYLD_INFO_ONLY&lt;/code&gt; to find the &lt;code&gt;export_off&lt;/code&gt; value, I highly recommend opening up a hex editor (&lt;code&gt;M-x hexl-find-file&lt;/code&gt; if you&amp;#39;re cool), and jumping to that location in the binary.  Mine is 0x2000, yours will probably be different.&lt;/p&gt;
 
@@ -605,7 +910,7 @@ to interpret it.&lt;/p&gt;
 
 &lt;p&gt;Lastly, and &lt;strong&gt;very importantly&lt;/strong&gt;, the &lt;em&gt;next&lt;/em&gt; uleb128 after whatever type the symbol is (so, depending on the type, it could be several bytes or uleb&amp;#39;s later, see point 2. in the mach trie summary), is the number of child branches.  In the case of &amp;quot;kTOC_MAGICAL_FUN&amp;quot;, the number is 0.  But, it doesn&amp;#39;t have to be.  The node with terminal export information can also have children; a good example of this can be found in &lt;code&gt;/usr/lib/system/libsystem_c.dylib&lt;/code&gt; with &lt;code&gt;_printf&lt;/code&gt; and &lt;code&gt;_printf_l&lt;/code&gt;, where the latter will be a child node containing the export information for &lt;code&gt;_printf&lt;/code&gt;; don&amp;#39;t terminate your loop (or recursion if you&amp;#39;re awesome) when you encounter a &amp;quot;terminal&amp;quot; node, as strange as that sounds, because it might have children.&lt;/p&gt;
 
-&lt;h3&gt;Imports&lt;/h3&gt;
+&lt;h3 id=&quot;imports&quot;&gt;Imports&lt;/h3&gt;
 
 &lt;figure&gt;
 &lt;img src=&quot;/images/darwin_system_imports.png&quot; alt=&quot;hiya&quot;/&gt;
@@ -633,15 +938,15 @@ to interpret it.&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;Some C++ programs require dyld to unique symbols so that all
    images in the process use the same copy of some code/data.
-   This step is done after binding. The content of the weak&lt;em&gt;bind
-   info is an opcode stream like the bind&lt;/em&gt;info.  But it is sorted
+   This step is done after binding. The content of the weak_bind
+   info is an opcode stream like the bind_info.  But it is sorted
    alphabetically by symbol name.  This enable dyld to walk
    all images with weak binding information in order and look
    for collisions.  If there are no collisions, dyld does
    no updating.  That means that some fixups are also encoded
-   in the bind&lt;em&gt;info.  For instance, all calls to &amp;quot;operator new&amp;quot;
+   in the bind_info.  For instance, all calls to &amp;quot;operator new&amp;quot;
    are first bound to libstdc++.dylib using the information
-   in bind&lt;/em&gt;info.  Then if some image overrides operator new
+   in bind_info.  Then if some image overrides operator new
    that is detected when the weak_bind information is processed
    and the call to operator new is then rebound.&lt;/p&gt;
 &lt;/blockquote&gt;
@@ -691,7 +996,7 @@ toc_maximum: 3
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;If not, either my directions are wrong, or you didn&amp;#39;t follow my directions (exclusive or).&lt;/p&gt;
 
-&lt;h4&gt;Mach Import Bind FSA&lt;/h4&gt;
+&lt;h4 id=&quot;mach-import-bind-fsa&quot;&gt;Mach Import Bind FSA&lt;/h4&gt;
 
 &lt;p&gt;Now that we&amp;#39;ve got a running mach-o binary with imports, we can run something like &lt;code&gt;otool -l | grep bind_&lt;/code&gt; to get the import binding offsets.  My own program&amp;#39;s output tells me:&lt;/p&gt;
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;( 4): DYLD_INFO_ONLY (0x80000022) 48
@@ -879,7 +1184,7 @@ BIND_OPCODE_DONE -&amp;gt; 0x0
 0x37 with  seg_index: 0 seg_offset: 0x0 lib_ordinal: 0 type: 1 flags: 0 special_dylib: 1
 End of opcode stream
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;h2&gt;Coda&lt;/h2&gt;
+&lt;h2 id=&quot;coda&quot;&gt;Coda&lt;/h2&gt;
 
 &lt;p&gt;There&amp;#39;s a lot more to talk about; rebase opcodes, estimating routine sizes, dependency graphs, unicode symbols, etc., etc.&lt;/p&gt;
 
@@ -892,8 +1197,8 @@ End of opcode stream
 &lt;p&gt;&lt;img src=&quot;/images/libz.dylib.png&quot; alt=&quot;libz&quot;&gt;&lt;/p&gt;
 </description>
         <pubDate>Sun, 29 Mar 2015 00:00:00 -0600</pubDate>
-        <link>http://m4b.github.io.com/reverse/engineering/mach/binaries/2015/03/29/mach-binaries.html</link>
-        <guid isPermaLink="true">http://m4b.github.io.com/reverse/engineering/mach/binaries/2015/03/29/mach-binaries.html</guid>
+        <link>http://www.m4b.io/reverse/engineering/mach/binaries/2015/03/29/mach-binaries.html</link>
+        <guid isPermaLink="true">http://www.m4b.io/reverse/engineering/mach/binaries/2015/03/29/mach-binaries.html</guid>
         
         <category>reverse engineering</category>
         

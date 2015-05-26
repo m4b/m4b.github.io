@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-61305800-1', 'auto');
+    ga('require', 'linkid', 'linkid.js');
+    ga('send', 'pageview');
+  </script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width initial-scale=1" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <title>What is an ELF Export?</title>
+  <meta name="description" content="An online electronic journal repository for various projects, topics, tutorials, and other such texts, usually dealing with programming languages, reverse engineering, CS theory, object/binary analysis, formal methods, formal logic, and maybe, sometimes, even philosophy
+">
+
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="http://www.m4b.io/elf/export/binary/analysis/2015/05/25/what-is-an-elf-export.html">
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+  <div class="wrapper">
+
+    <a class="site-title" href="/">m4b mov</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+
+      <div class="trigger">
+        
+          
+          <a class="page-link" href="/about/">About</a>
+          
+        
+          
+        
+          
+        
+          
+          <a class="page-link" href="/gallery/index.html">Image Gallery</a>
+          
+        
+          
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">What is an ELF Export?</h1>
+    <p class="post-meta">May 25, 2015 • m4b</p>
+  </header>
+
+  <article class="post-content">
+    <p><img src="/images/rankin-bass-hobbit-elves.jpg" alt="Some Elves marching off to kill things, like linux does"></p>
+
+<p>This an article on how one might define what an ELF <em>export</em> is, and by way of relation, what an ELF import is.  To avoid confusion and consternation, it is only indirectly about ELF globally visible symbols, and other ELF specific mechanisms, although I believe the two are frequently conflated.  The latter is specific to the ELF binary format, whereas an &quot;ELF export&quot; is what I mean by the ELF format&#39;s <em>expression</em> of an exported symbol.</p>
+
+<p>Multiple binary format containers express the concept of an exported symbol in different ways, but I think they all are approximating, in their own unique ways, two principles which I sketch later on, and the following.</p>
+
+<p>Put simply, an export is a datum, such as an integer or a string, <em>or</em> a sequence of instructions which execute in some predefined and semantically coherent manner - a routine, or a function - which is available for public use.  An exported symbol is therefore a name <em>pointing</em> to either an integer or a string, or a function, and made available for use.  Calling anything else an export seems to me a failing of the binary format, typically because we have repurposed its existing mechanisms <em>because</em> they failed us in expressing a new (or older) concept.</p>
+
+<p>The C concept of <code>extern</code> essentially implements this notion at the source level.</p>
+
+<p>Similarly, an import is the dual or inverse of an export, and will have a similar characterization.</p>
+
+<p>And it is this characterization of an &quot;export&quot; that I have in mind (and I&#39;m pretty sure you do too) when I ask &quot;What is an ELF export?&quot;</p>
+
+<p>The <em>casus belli</em> of this article however is that I can&#39;t seem to find anything on the internet <em>explicitly</em> detailing or logically <em>defining</em> what makes something an <em>ELF</em> export or not (focusing on the ELF part).  <a href="http://stackoverflow.com/questions/12666253/elf-imports-and-exports">This answer</a> says that if a symbol is <em>not</em> <code>SHN_UNDEF</code> then it&#39;s &quot;defined and exported&quot;.  That&#39;s the best I&#39;ve seen, but it&#39;s not correct.</p>
+
+<p>Normally you <a href="http://stackoverflow.com/questions/34732/how-do-i-list-the-symbols-in-a-so-file">just</a> see <a href="http://stackoverflow.com/questions/6668434/names-of-source-shared-libraries-for-imported-symbols-in-elf-format">people</a> telling <a href="http://stackoverflow.com/questions/10480657/import-names-in-elf-binary">you</a> to use <code>nm</code> or <code>readelf</code> to get the imports or exports, which isn&#39;t an explanation, but a means (In the age of cargo culting, however, this distinction might not mean much).</p>
+
+<p>According to this <a href="http://www.skyfree.org/linux/references/ELF_Format.pdf">somewhat official looking ELF specification</a>:</p>
+
+<blockquote>
+<p>Global symbols are visible to all object files being combined.
+One file’s definition of a global symbol will satisfy another file’s
+undefined reference to the same global symbol. [1-18]</p>
+</blockquote>
+
+<p>So there you have it.  Except I didn&#39;t ask what a global symbol was; I asked what an ELF export was.  And as it turns out, even if we accept globalness as a definition, or non-<code>SHN_UNDEF</code>ness as a definition, as most things are, it&#39;s a <em>little</em> more complicated than that.</p>
+
+<p>If you want to go down the <img class='emoji' title=':rabbit:' alt=':rabbit:' src='https://assets.github.com/images/icons/emoji/unicode/1f430.png' height='20' width='20' align='absmiddle' /> hole, then read on; otherwise just skip to the <a href="#conclusion">conclusion</a>, where you&#39;ll find what I consider a robust, logical definition of ELF imports and exports, as I characterized them above.</p>
+
+<h2 id="elf-exports">ELF Exports</h2>
+
+<p>Take a symbol like <code>GLIBC_2.2.5</code> (yes, it&#39;s a real symbol, take a peak inside of the <code>_DYNAMIC</code> array in <code>/usr/lib/ld-linux-x86-64.so.2</code>): it&#39;s listed as a <code>GLOBAL</code> <code>OBJECT</code> with an <code>ABS</code> shndx, and no address (this might actually make sense).</p>
+
+<p>But if &quot;all defined global symbols are exports&quot;, then <code>GLIBC_2.2.5</code> must be an exported symbol from <code>ld-linux-x86-64-so.2</code>.</p>
+
+<p>If you answered yes, then you&#39;d be wrong, because it&#39;s definitely not defined in <code>ld-linux-x86-64-so.2</code>, but rather in <code>libc.so.6</code>.  So then our definition isn&#39;t quite right, because strictly speaking, <code>GLIBC_2.2.5</code> isn&#39;t <strong>un</strong>defined (<code>shndx = 0</code>), so it&#39;s a little more complicated than just &quot;anything not undefined is exported and defined&quot;.</p>
+
+<p>So it must be an exported symbol in <code>libc.so.6</code>.  Well, it occurs just exactly as it does in <code>ld-linux-x86-64-so.2</code>, so who knows what to make of that.</p>
+
+<p>Of course someone will lampoon me perhaps at this point, saying it&#39;s a way of versioning the function calls using <code>VERNEED</code> or <code>VERDAUX</code> or something silly like that in the <code>_DYNAMIC</code> array, etc. <code>memcpy</code>, for example, is like this.  In my setup, as of this writing, my <code>libc.so.6</code> defines two <code>memcpy</code>&#39;s, one for different versions of libc.</p>
+
+<p>Which is fine; but it seems clear that <code>GLIBC_2.2.5</code> isn&#39;t really an exported symbol in the sense you or I typically mean, but has been kind of grafted on with the available ELF <code>#define</code>s that we call types, and repurposed for those uses.  Which, as I said, is fine.</p>
+
+<p>And I say it&#39;s not in the sense you or I typically mean because I&#39;m pretty sure if I monkey-patch a binary right now and import <code>GLIBC_2.2.5</code>, <em>weird</em> stuff&#39;s going to happen.  More on this particular point a little later.</p>
+
+<p>This is perhaps a corner case; and importantly, we should be able to write a program that takes a binary and outputs the exports for that binary.  In order words, the &quot;services&quot; it provides for all to use.</p>
+
+<p>After all, some program has to be doing this (it&#39;s actually called <code>ld-linux-x86-64.so.2</code>, which is the default dynamic linker on (my) linux).</p>
+
+<p>So in this export-printing program, we have to tell it exactly what an ELF export is: and now we can say that an ELF export is every symbol which is <code>GLOBAL</code>, defined, and doesn&#39;t have an empty (<code>0x0</code>) address offset.</p>
+
+<p>Well, that also doesn&#39;t work; we actually need to count <code>WEAK</code> symbols as exported symbols, like <code>vsnprintf</code> and a host of other symbols in <code>libc.so.6</code>.</p>
+
+<p>Unfortunately, adding this to our criterion won&#39;t work either; compile a crappy binary that increments <code>0xdeadbeef</code> or something.  Now run something like <code>readelf --syms &lt;your crappy binary&gt;</code>, and you&#39;ll see a bunch of... defined <code>GLOBAL</code> <em>and</em> <code>WEAK</code> symbols <em>with</em> address offsets that are non-zero.</p>
+
+<p>Since I&#39;m pretty sure <code>_DYNAMIC</code> isn&#39;t exported by your binary (or <code>_edata</code>, or the various other nlist symbols for use in debugging), otherwise the (linux) world might explode, this means our definition still isn&#39;t right.  (Actually, this might be a future exercise, seeing what happens when a symbol named <code>_DYNAMIC</code> is exported)</p>
+
+<p>Which brings us to our <em>final revision</em>: <strong>an ELF symbol is exported iff if it is (<code>GLOBAL</code> <em>or</em> <code>WEAK</code>) <em>and</em> is defined <em>and</em> has a non-zero address <em>and</em> has an entry in a <code>SYMTAB</code> table in the <code>_DYNAMIC</code> array</strong>.</p>
+
+<p>So there you have it.</p>
+
+<p>Unfortunately, <a href="h4des.org/blog/index.php?/archives/346-ELF-obfuscation-let-analysis-tools-show-wrong-external-symbol-calls.html">as has been noted here</a>, many programs mess this up.</p>
+
+<p>If I run <code>nm -g /usr/lib/libz.so.1.2.8</code> on archlinux, which as of this writing strips libz, <code>nm</code> returns no symbols.  But I assure you, there&#39;s <em>plenty</em> of symbols exported by libz.  If you have the ability to install a package like <code>elfutils</code>, <code>readelf --dyn-syms /usr/lib/libz.so.1.2.8</code> will show you that.</p>
+
+<p>Unfortunately, as the article above mentions, section headers are <em>also</em> optional in ELF binaries, and you can <code>sstrip</code> a binary or dynamic lib to really confuse some (looks like most?) of these programs.  For me, <code>sstrip</code>ing (a copy) of libz and running the same command from above does not produce any symbols... ಠ_ಠ</p>
+
+<p>While there is a lot of good information in the section headers and the symbol table/nlist if it&#39;s avaialble, from a practical perspective (I&#39;d also say logical/philosophical), <em>an exported symbol is <strong>at least</strong> that which is visible to the dynamic linker</em>; therefore, if a program which purporteldy outputs a program&#39;s exports relies entirely on section headers, and not the <code>_DYNAMIC</code> array, then it&#39;s not really telling us what the exports are, because the dynamic linker <em>only</em> cares about what&#39;s in <code>_DYNAMIC</code>.</p>
+
+<h2 id="elf-imports">ELF Imports</h2>
+
+<p>So, I&#39;m going to say something controversial about what an (any) export <em>is</em>, and in doing so, introduce the <em>first recursive principle of imports and exports</em>:</p>
+
+<blockquote>
+<p>(1) <strong>an export is something that can be imported</strong></p>
+</blockquote>
+
+<p>I think there&#39;s something deeply mystical, mutually recursive, and satisfying about that, and I like it --- because now we need to start thinking about what an import is.  You might think that an ELF import is just every undefined symbol, like the stack overflow answer suggested.</p>
+
+<p>That&#39;s wrong too, unfortunately, at least technically speaking.  The first entry of every symbol table, if the binary is ELF API conforming, must be the &quot;null&quot; entry; as a result, there always exists at least one undefined, <code>LOCAL</code> symbol, with no name.</p>
+
+<p>Of course one might argue it&#39;s still an import, which just sounds like they&#39;re arguing it is an undefined symbol; and similarly, for exports, that they&#39;re simply globally visible symbols.</p>
+
+<p>But I think the philosophical crux of my point is that an import <em>isn&#39;t just an undefined symbol</em> and an export <em>isn&#39;t just a globally visible symbol</em> - they&#39;re subject to (or should be) structured, <em>semantic</em> constraints, and this characterization is something that mach-o binaries <em>really</em> nailed, so much so that it&#39;s a pleasure analyzing them.  See this long-winded analysis on <a href="/reverse/engineering/mach/binaries/2015/03/29/mach-binaries.html">mach-o binaries</a> for how exports are very structured, constrained things (they only occur in the export trie); and how imports are very structured, constrained things (they only occur in the imports FSA).</p>
+
+<p>To illustrate using a real example, and which is currently vexing me (maybe someone can send a nasty (or nice) email telling me what&#39;s going on here), occasionally, you find undefined <code>NOTYPE</code> <code>WEAK</code> symbols in the <code>_DYNAMIC</code> array.</p>
+
+<p>As of this writing, in <code>libc.so.6</code>, <code>_dl_starting_up</code> is such a symbol.  The <code>_dl</code> indicates it comes from the dynamic loader&#39;s API, which <code>ld-linux-x86-64.so.2</code> provides.</p>
+
+<p>This is the API-qua-exports of linux&#39;s dynamic linker:</p>
+
+<table><thead>
+<tr>
+<th style="text-align: right">Address Offset</th>
+<th style="text-align: right">Symbol Name (Size)</th>
+</tr>
+</thead><tbody>
+<tr>
+<td style="text-align: right">8ce0</td>
+<td style="text-align: right"><code>_dl_rtld_di_serinfo</code> (535)</td>
+</tr>
+<tr>
+<td style="text-align: right">fa00</td>
+<td style="text-align: right"><code>_dl_debug_state</code> (2)</td>
+</tr>
+<tr>
+<td style="text-align: right">113d0</td>
+<td style="text-align: right"><code>_dl_mcount</code> (590)</td>
+</tr>
+<tr>
+<td style="text-align: right">11d30</td>
+<td style="text-align: right"><code>_dl_tls_setup</code> (165)</td>
+</tr>
+<tr>
+<td style="text-align: right">11de0</td>
+<td style="text-align: right"><code>_dl_get_tls_static_info</code> (21)</td>
+</tr>
+<tr>
+<td style="text-align: right">11ea0</td>
+<td style="text-align: right"><code>_dl_allocate_tls_init</code> (621)</td>
+</tr>
+<tr>
+<td style="text-align: right">12110</td>
+<td style="text-align: right"><code>_dl_allocate_tls</code> (49)</td>
+</tr>
+<tr>
+<td style="text-align: right">12150</td>
+<td style="text-align: right"><code>_dl_deallocate_tls</code> (132)</td>
+</tr>
+<tr>
+<td style="text-align: right">124a0</td>
+<td style="text-align: right"><code>__tls_get_addr</code> (63)</td>
+</tr>
+<tr>
+<td style="text-align: right">128a0</td>
+<td style="text-align: right"><code>_dl_make_stack_executable</code> (136)</td>
+</tr>
+<tr>
+<td style="text-align: right">13310</td>
+<td style="text-align: right"><code>_dl_find_dso_for_object</code> (177)</td>
+</tr>
+<tr>
+<td style="text-align: right">16950</td>
+<td style="text-align: right"><code>__libc_memalign</code> (248)</td>
+</tr>
+<tr>
+<td style="text-align: right">16a50</td>
+<td style="text-align: right"><code>malloc</code> (13)</td>
+</tr>
+<tr>
+<td style="text-align: right">16a60</td>
+<td style="text-align: right"><code>calloc</code> (59)</td>
+</tr>
+<tr>
+<td style="text-align: right">16aa0</td>
+<td style="text-align: right"><code>free</code> (46)</td>
+</tr>
+<tr>
+<td style="text-align: right">16c10</td>
+<td style="text-align: right"><code>realloc</code> (138)</td>
+</tr>
+<tr>
+<td style="text-align: right">21c40</td>
+<td style="text-align: right"><code>_rtld_global_ro</code> (296)</td>
+</tr>
+<tr>
+<td style="text-align: right">21d78</td>
+<td style="text-align: right"><code>_dl_argv</code> (8)</td>
+</tr>
+<tr>
+<td style="text-align: right">21de0</td>
+<td style="text-align: right"><code>__libc_stack_end</code> (8)</td>
+</tr>
+<tr>
+<td style="text-align: right">21de8</td>
+<td style="text-align: right"><code>__libc_enable_secure</code> (4)</td>
+</tr>
+<tr>
+<td style="text-align: right">22000</td>
+<td style="text-align: right"><code>_rtld_global</code> (3968)</td>
+</tr>
+<tr>
+<td style="text-align: right">223100</td>
+<td style="text-align: right"><code>_r_debug</code> (40)</td>
+</tr>
+</tbody></table>
+
+<p>Unfortunately, <code>_dl_starting_up</code> is nowhere to be seen.  Lucky for us, <code>libc.so.6</code> is executable - yea, you heard that right, we can run the libc dynamic library.  And if we can run it, then with some esoteric dynamic linking environment variable knowledge, we can force all those stupid lazily bound symbols to be more like ML and not Haskell, and bind on startup.</p>
+
+<p>To wit, we can do something like:</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">$ LD_BIND_NOW=1 LD_DEBUG=all /usr/lib/libc.so.6 2&gt;&amp;1 &gt;/dev/null | grep -C 2 _dl_starting_up
+     22011: symbol=optind;  lookup in file=/usr/lib/libc.so.6 [0]
+     22011: binding file /usr/lib/libc.so.6 [0] to /usr/lib/libc.so.6 [0]: normal symbol `optind&#39; [GLIBC_2.2.5]
+     22011: symbol=_dl_starting_up;  lookup in file=/usr/lib/libc.so.6 [0]
+     22011: symbol=_dl_starting_up;  lookup in file=/usr/lib/ld-linux-x86-64.so.2 [0]
+     22011: symbol=stdout;  lookup in file=/usr/lib/libc.so.6 [0]
+     22011: binding file /usr/lib/libc.so.6 [0] to /usr/lib/libc.so.6 [0]: normal symbol `stdout&#39; [GLIBC_2.2.5]
+</code></pre></div>
+<p>Unfortunately, what that tells us is that the symbol <code>_dl_starting_up</code> was not bound, because it wasn&#39;t found in <code>ld-linux-x86-64.so.2</code>, because it&#39;s not exported by that library.</p>
+
+<p>And this is ok, because <code>_dl_starting_up</code> is a weak symbol.  But then we need to ask ourselves: is it really an imported symbol if it doesn&#39;t have a type, and isn&#39;t exported by any library?  I&#39;m sure it has some function (likely another repurposing hack because the binary format failed us), and I really am looking forward to an email explaining this bit of low-level arcana, but I think it illustrates my second recursive principle:</p>
+
+<blockquote>
+<p>(2) <strong>All imported symbols must be exported from somewhere</strong></p>
+</blockquote>
+
+<p>To put this a bit more formally: for all x, if x is an imported symbol, then there exists a y, such that y is a library and y exports x.</p>
+
+<p>This may be a biconditional, I haven&#39;t decided yet (if we remember our formal logic (doubtful?), this is only a <em>necessary</em> condition for imported symbolhood, and not a <em>sufficient</em> one).</p>
+
+<h2 id="conclusion">Conclusion</h2>
+
+<p>To conclude, given the richness of ELF and GNU/Linux visibility conditions, definedness, and symbol types, being an export, in my opinion, is more fuzzy than I&#39;d like, especially compared to other binary container formats (e.g., mach).  But I think it is possible to give a set of logical constraints which approximate the characterization of an &quot;exported symbol&quot; I gave at the start.</p>
+
+<p>As such, I embarked on a philosophical discussion of what it is to be an ELF export, and ended up with two &quot;recursive&quot; principles of import and exporthood; pragmatic C hackers and reverse engineers, if they&#39;ve read this far, have probably gone apoplectic.  Sorry about that.</p>
+
+<p>And unfortunately, performing a depth-first search of the internet only turned up dubious explanations or program suggestions for determining ELF exports and imports, whereas I wanted a logical <em>definition</em>.</p>
+
+<p>If you were like me, or you just need to write a program that prints what I&#39;ll coin right now are the <em>semantically tenable logical exports</em> (and imports) of an ELF binary, then I present to you, in all their pseudo logic glory:</p>
+
+<h4 id="-the-logical-elf-import-and-export-definitions-"><img class='emoji' title=':trumpet:' alt=':trumpet:' src='https://assets.github.com/images/icons/emoji/unicode/1f3ba.png' height='20' width='20' align='absmiddle' /> <em>The Logical ELF Import and Export Definitions</em> <img class='emoji' title=':trumpet:' alt=':trumpet:' src='https://assets.github.com/images/icons/emoji/unicode/1f3ba.png' height='20' width='20' align='absmiddle' /></h4>
+
+<ol>
+<li><p>A symbol x is an ELF export iff:</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">x.st_value ≠ 0x0
+∧ x.st_shndex ≠ SHN_UNDEF
+∧ (x.st_bind = GLOBAL ∨ x.st_bind = WEAK)
+∧ (x.st_type = IFUNC ∨ x.st_type = FUNC ∨ x.st_type = OBJECT )
+</code></pre></div></li>
+<li><p>A symbol x is an ELF import iff:</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">x.st_value = 0x0
+∧ (x.st_bind = GLOBAL ∨ x.st_bind = WEAK)   
+∧ x.st_shndex = SHN_UNDEF
+∧ x.st_name ≠ 0
+∧ (x.st_type = IFUNC ∨ x.st_type = FUNC ∨ x.st_type = OBJECT )
+</code></pre></div></li>
+</ol>
+
+<h1 id="appendix">Appendix</h1>
+
+<h3 id="a">A</h3>
+
+<h4 id="elf-type-conditions-in-logical-import-and-export-definitions">ELF Type Conditions in Logical Import and Export Definitions</h4>
+
+<p>So the final condition in the logical ELF import and export definitions is <code>(x.st_type = IFUNC ∨ x.st_type = FUNC ∨ x.st_type = OBJECT )</code>, which might be too strict for some.</p>
+
+<p>This is a reasonable concern; for example, many binaries import <code>_Jv_RegisterClasses</code> which has <code>NOTYPE</code>, <code>GLOBAL</code>, an undefined <code>shndx</code> and a zero address.  This symbol even has exporting libraries: <code>/usr/lib/libgcj_bc.so</code> and <code>/usr/lib/libgcj.so.15.0.0</code>.</p>
+
+<p>If it weren&#39;t for the <code>NOTYPE</code> it would qualify as an import, <em>and</em> have the bonus of satisfying the recursive principles.</p>
+
+<p>Interestingly, unlike something like <code>__gmon_start__</code>, which is exported nowhere, this symbol (despite to the contrary what its <code>st_type</code> says) actually <em>is</em> a function, <em>and</em> which satisfies the logical definition of an ELF export: it is a <code>FUNC</code>, it&#39;s <code>GLOBAL</code>, is defined, and has an address.</p>
+
+<p>Disassembling gives the added bonus of coherent instruction sequences.  E.g., for me, at offset <code>0x1320</code> in <code>/usr/lib/libgcj_bc.so</code> we have:</p>
+<div class="highlight"><pre><code class="language-asm" data-lang="asm">    <span class="na">.text</span>
+    <span class="nf">subq</span>    <span class="no">$8</span><span class="p">,</span> <span class="nv">%rsp</span>
+    <span class="nf">xorl</span>    <span class="nv">%eax</span><span class="p">,</span> <span class="nv">%eax</span>
+    <span class="nf">callq</span>   <span class="p">-</span><span class="mi">395</span>
+</code></pre></div>
+<p>This could be an oversight/bug in the compiler, and it&#39;s <code>st_type</code> really should be <code>FUNC</code> - it&#39;s hard to say.</p>
+
+<p>But in the case of something like <code>__gmon_start__</code>, which is used by <code>/usr/bin/gprof</code> (but isn&#39;t exported by that binary), the case for it&#39;s not really being an import is more reasonable - so different <code>NOTYPE</code> <code>GLOBAL</code> undefined zero-address symbols seem to have different behavior.</p>
+
+<p>As such, for practical reasons, it might be prudent to let the last clause in the logical ELF import and export definition be optional, for unusual cases like this (depending on your use case).</p>
+
+<p>In the end, you&#39;re free to do whatever you want.  Just don&#39;t hurt anybody!</p>
+
+<h3 id="b">B</h3>
+
+<h4 id="_dl_starting_up"><code>_dl_starting_up</code></h4>
+
+<p>For the curious, we can actually find the symbol reference in the <code>rtld.c</code> source code, beginning at line 110:</p>
+<div class="highlight"><pre><code class="language-c" data-lang="c"><span class="cp">#ifndef HAVE_INLINED_SYSCALLS</span>
+<span class="cm">/* Set nonzero during loading and initialization of executable and</span>
+<span class="cm">   libraries, cleared before the executable&#39;s entry point runs.  This</span>
+<span class="cm">   must not be initialized to nonzero, because the unused dynamic</span>
+<span class="cm">   linker loaded in for libc.so&#39;s &quot;ld.so.1&quot; dep will provide the</span>
+<span class="cm">   definition seen by libc.so&#39;s initializer; that value must be zero,</span>
+<span class="cm">   and will be since that dynamic linker&#39;s _dl_start and dl_main will</span>
+<span class="cm">   never be called.  */</span>
+<span class="kt">int</span> <span class="n">_dl_starting_up</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="n">rtld_hidden_def</span> <span class="p">(</span><span class="n">_dl_starting_up</span><span class="p">)</span>
+<span class="cp">#endif</span>
+</code></pre></div>
+<p>According to this obtuse piece of documentation, I should be able to inspect <code>_dl_starting_up</code> in a debugger; if I mess around with this or figure out what&#39;s going on, I&#39;ll post back here.</p>
+
+<p>Or again, someone well versed in this weirdness can enlighten me through email, and I&#39;ll put <em>their</em> answer here.</p>
+
+  </article>
+
+</div>
+
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">m4b mov</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col  footer-col-1">
+        <ul class="contact-list">
+          <li>m4b mov</li>
+          <li><a href="mailto:m4b.github.io@gmail.com">m4b.github.io@gmail.com</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col  footer-col-2">
+        <ul class="social-media-list">
+          
+          <li>
+            <a href="https://github.com/m4b">
+              <span class="icon  icon--github">
+                <svg viewBox="0 0 16 16">
+                  <path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/>
+                </svg>
+              </span>
+
+              <span class="username">m4b</span>
+            </a>
+          </li>
+          
+
+          
+        </ul>
+      </div>
+
+      <div class="footer-col  footer-col-3">
+        <p class="text">An online electronic journal repository for various projects, topics, tutorials, and other such texts, usually dealing with programming languages, reverse engineering, CS theory, object/binary analysis, formal methods, formal logic, and maybe, sometimes, even philosophy
+</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>
