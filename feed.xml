@@ -6,8 +6,8 @@
 </description>
     <link>http://www.m4b.io/</link>
     <atom:link href="http://www.m4b.io/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Mon, 25 May 2015 23:02:36 -0600</pubDate>
-    <lastBuildDate>Mon, 25 May 2015 23:02:36 -0600</lastBuildDate>
+    <pubDate>Wed, 27 May 2015 20:37:47 -0600</pubDate>
+    <lastBuildDate>Wed, 27 May 2015 20:37:47 -0600</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
     
       <item>
@@ -239,14 +239,16 @@ undefined reference to the same global symbol. [1-18]&lt;/p&gt;
 &lt;li&gt;&lt;p&gt;A symbol x is an ELF export iff:&lt;/p&gt;
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;x.st_value ≠ 0x0
 ∧ x.st_shndex ≠ SHN_UNDEF
+∧ (x ∈ SYMTAB ∧ SYMTAB ∈ _DYNAMIC)
 ∧ (x.st_bind = GLOBAL ∨ x.st_bind = WEAK)
 ∧ (x.st_type = IFUNC ∨ x.st_type = FUNC ∨ x.st_type = OBJECT )
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/li&gt;
 &lt;li&gt;&lt;p&gt;A symbol x is an ELF import iff:&lt;/p&gt;
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;x.st_value = 0x0
-∧ (x.st_bind = GLOBAL ∨ x.st_bind = WEAK)   
 ∧ x.st_shndex = SHN_UNDEF
 ∧ x.st_name ≠ 0
+∧ (x ∈ SYMTAB ∧ SYMTAB ∈ _DYNAMIC)
+∧ (x.st_bind = GLOBAL ∨ x.st_bind = WEAK)   
 ∧ (x.st_type = IFUNC ∨ x.st_type = FUNC ∨ x.st_type = OBJECT )
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/li&gt;
 &lt;/ol&gt;

@@ -302,14 +302,16 @@ undefined reference to the same global symbol. [1-18]</p>
 <li><p>A symbol x is an ELF export iff:</p>
 <div class="highlight"><pre><code class="language-text" data-lang="text">x.st_value ≠ 0x0
 ∧ x.st_shndex ≠ SHN_UNDEF
+∧ (x ∈ SYMTAB ∧ SYMTAB ∈ _DYNAMIC)
 ∧ (x.st_bind = GLOBAL ∨ x.st_bind = WEAK)
 ∧ (x.st_type = IFUNC ∨ x.st_type = FUNC ∨ x.st_type = OBJECT )
 </code></pre></div></li>
 <li><p>A symbol x is an ELF import iff:</p>
 <div class="highlight"><pre><code class="language-text" data-lang="text">x.st_value = 0x0
-∧ (x.st_bind = GLOBAL ∨ x.st_bind = WEAK)   
 ∧ x.st_shndex = SHN_UNDEF
 ∧ x.st_name ≠ 0
+∧ (x ∈ SYMTAB ∧ SYMTAB ∈ _DYNAMIC)
+∧ (x.st_bind = GLOBAL ∨ x.st_bind = WEAK)   
 ∧ (x.st_type = IFUNC ∨ x.st_type = FUNC ∨ x.st_type = OBJECT )
 </code></pre></div></li>
 </ol>
