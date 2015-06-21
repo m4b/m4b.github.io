@@ -6,9 +6,85 @@
 </description>
     <link>http://www.m4b.io/</link>
     <atom:link href="http://www.m4b.io/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Sun, 21 Jun 2015 14:21:00 -0600</pubDate>
-    <lastBuildDate>Sun, 21 Jun 2015 14:21:00 -0600</lastBuildDate>
+    <pubDate>Sun, 21 Jun 2015 17:46:47 -0600</pubDate>
+    <lastBuildDate>Sun, 21 Jun 2015 17:46:47 -0600</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
+    
+      <item>
+        <title>Rdr Released!</title>
+        <description>&lt;p&gt;I am proud to announce the first release of some software I&amp;#39;ve been working on for a bit.  It&amp;#39;s called &lt;code&gt;rdr&lt;/code&gt;, and here&amp;#39;s the official byline:&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;&lt;code&gt;rdr&lt;/code&gt; is an OCaml tool/library for doing cross-platform analysis of binaries, by printing headers, locating entry points, showing import and export symbols, their binary offsets and size, etc.&lt;/p&gt;
+
+&lt;p&gt;It also features a symbol map which allows fast lookups for arbitrary symbols, and their associated data, on your system (the default search location are binaries in /usr/lib).&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;Why OCaml?  Well, it&amp;#39;s fast, it&amp;#39;s fun, and it was easy to write.  OCaml allowed me to focus on the fun parts, like building the symbol map, or doing some static binary analysis, instead of worrying about low level details like manual memory management for the sake of &amp;quot;speed&amp;quot;.  But mostly, because I can write it in whatever language I want, so there!&lt;/p&gt;
+
+&lt;p&gt;It&amp;#39;s also the tool I&amp;#39;ve been using to do the various visualizations scattered about in my posts, and I also find it invaluable when examining binaries, especially using the symbol map to get offsets, etc.  And if you&amp;#39;ve got linker errors, it helps there as well.&lt;/p&gt;
+
+&lt;p&gt;I&amp;#39;ve decided to release it now, in the hopes that other people will get involved (I think there&amp;#39;s a lot more funs things to be done, see the TODO on the project page), and also because it was just time.&lt;/p&gt;
+
+&lt;p&gt;Here are some of its major features:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;64-bit Linux and Mach-o binary analysis&lt;/li&gt;
+&lt;li&gt;Searchable symbol-map of all the symbols on your system, including binary offset, size, and exporting library&lt;/li&gt;
+&lt;li&gt;Print imports and exports of binaries&lt;/li&gt;
+&lt;li&gt;Make pretty graphs, at the binary or symbol map level&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;See the &lt;a href=&quot;http://github.com/m4b/rdr&quot;&gt;README&lt;/a&gt; for more details.&lt;/p&gt;
+
+&lt;p&gt;The project is under active development, and if you&amp;#39;re an OCaml hacker, or even if you&amp;#39;re not, I heartily encourage submissions and pull requests.&lt;/p&gt;
+
+&lt;p&gt;Have fun!&lt;/p&gt;
+</description>
+        <pubDate>Sun, 21 Jun 2015 00:00:00 -0600</pubDate>
+        <link>http://www.m4b.io/reverse/engineering/software/release/2015/06/21/rdr-released.html</link>
+        <guid isPermaLink="true">http://www.m4b.io/reverse/engineering/software/release/2015/06/21/rdr-released.html</guid>
+        
+        <category>reverse engineering</category>
+        
+        <category>ocaml</category>
+        
+        <category>software</category>
+        
+        <category>tool</category>
+        
+        <category>analysis</category>
+        
+        <category>symbols</category>
+        
+        <category>imports</category>
+        
+        <category>exports</category>
+        
+        <category>osx</category>
+        
+        <category>mac</category>
+        
+        <category>object</category>
+        
+        <category>elf</category>
+        
+        <category>binary</category>
+        
+        <category>binaries</category>
+        
+        <category>linux</category>
+        
+        
+        <category>reverse</category>
+        
+        <category>engineering</category>
+        
+        <category>software</category>
+        
+        <category>release</category>
+        
+      </item>
     
       <item>
         <title>What is an ELF Export?</title>
