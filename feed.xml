@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>m4b mov</title>
+    <title>All Offsets Are My Own</title>
     <description>An online electronic journal repository for various projects, topics, tutorials, and other such texts, usually dealing with programming languages, reverse engineering, CS theory, object/binary analysis, formal methods, formal logic, and maybe, sometimes, even philosophy
 </description>
     <link>http://www.m4b.io/</link>
     <atom:link href="http://www.m4b.io/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Wed, 27 May 2015 20:37:47 -0600</pubDate>
-    <lastBuildDate>Wed, 27 May 2015 20:37:47 -0600</lastBuildDate>
+    <pubDate>Sun, 21 Jun 2015 14:21:00 -0600</pubDate>
+    <lastBuildDate>Sun, 21 Jun 2015 14:21:00 -0600</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
     
       <item>
