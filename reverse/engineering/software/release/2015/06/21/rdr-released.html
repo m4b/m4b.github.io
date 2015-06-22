@@ -75,7 +75,7 @@
   </header>
 
   <article class="post-content">
-    <p>I am proud to announce the first release of some software I&#39;ve been working on for a bit.  It&#39;s called <code>rdr</code>, and here&#39;s the official byline:</p>
+    <p>I am proud to announce the first release of <a href="http://github.com/m4b/rdr">some software</a> I&#39;ve been working on for a bit.  It&#39;s called <code>rdr</code>, and here&#39;s the official byline:</p>
 
 <blockquote>
 <p><code>rdr</code> is an OCaml tool/library for doing cross-platform analysis of binaries, by printing headers, locating entry points, showing import and export symbols, their binary offsets and size, etc.</p>
@@ -98,11 +98,173 @@
 <li>Make pretty graphs, at the binary or symbol map level</li>
 </ul>
 
-<p>See the <a href="http://github.com/m4b/rdr">README</a> for more details.</p>
+<p>See the reproduced <a href="#README">README</a> below, for more details, or head to the <a href="http://github.com/m4b/rdr">github site</a>.</p>
 
 <p>The project is under active development, and if you&#39;re an OCaml hacker, or even if you&#39;re not, I heartily encourage submissions and pull requests.</p>
 
 <p>Have fun!</p>
+
+<hr>
+
+<h1 id="readme">README</h1>
+
+<p>Welcome to the <code>rdr</code> project.</p>
+
+<p><code>rdr</code> is an OCaml tool/library for doing cross-platform analysis of binaries.  I typically use it for looking up symbol names, finding the address offset, and then running <code>gdb</code> or <code>lldb</code> to mess around (you should be using both if you even know what you&#39;re doing).</p>
+
+<p>I also find that it&#39;s useful for resolving linking errors if you&#39;re trying to build some project, especially some random, misconfigured XCode project, or what have you.</p>
+
+<p>See the <a href="#usage">usage section</a> for a list of features.</p>
+
+<p>Currently, only 64-bit <em>ELF</em> and <em>mach-o</em> binaries are supported.  32-bit binaries aren&#39;t cool anymore; stop publishing reverse engineering tutorials on them.</p>
+
+<p>It has no OPAM dependencies (not that I don&#39;t love OPAM) and can be built with the provided <code>build.sh</code> script, or simply with:</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">ocamlbuild.native -lib unix -lib str src/Rdr.native <span class="o">&amp;&amp;</span> mv Rdr.native rdr
+</code></pre></div>
+<p>I&#39;ll look into getting it on OPAM soon, but it&#39;s in a state of <em>flux</em> right now, and is under <a href="TODO.md">active development</a>.  Contributions welcome!</p>
+
+<h1 id="install">Install</h1>
+
+<ul>
+<li>You must have OCaml installed, version 4.02.1.  You&#39;ll need at least 4.01 (I use <code>|&gt;</code> and <code>@@</code>), but I haven&#39;t tested on that.</li>
+<li>You must run the <code>build.sh</code> script, or execute <code>ocamlbuild.native -lib unix -lib str src/Rdr.native &amp;&amp; mv Rdr.native rdr</code> in the base directory.</li>
+<li>You may then copy or symlink the resulting <code>rdr</code> binary to anywhere that is exported in your <code>${PATH}</code> (or not do that, if that&#39;s your fancy).</li>
+</ul>
+
+<h1 id="usage">Usage</h1>
+
+<p>Essentially, <code>rdr</code> performs two tasks, and should probably be two programs.</p>
+
+<h2 id="binary-analysis">Binary Analysis</h2>
+
+<p>The first is pointing <code>rdr</code> at a binary.  Example:</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">rdr /usr/lib/libc.so.6
+</code></pre></div>
+<p>It should output something like: <code>ELF X86_64 DYN @ 0x20920</code>.  Which is boring.</p>
+
+<p>You can pass it various flags, <code>-e</code> for printing the exports found in the binary (see this post on <a href="http://www.m4b.io/elf/export/binary/analysis/2015/05/25/what-is-an-elf-export.html#conclusion">ELF exports</a> for what I&#39;m counting as an &quot;export&quot;), <code>-i</code> for imports, etc.  For mach-o binaries, exporthood and importhood are clearly defined, so blog posts detailing this aren&#39;t necessary (unless you want a <a href="http://www.m4b.io/reverse/engineering/mach/binaries/2015/03/29/mach-binaries.html">detailed analysis of the binary format</a>).</p>
+
+<p>Some examples:</p>
+
+<ul>
+<li><code>rdr -h</code> - prints a help menu</li>
+<li><code>rdr -h /usr/lib/libc.so.6</code> - prints the program headers, bookkeeping data, and other beaurocratic aspects of binaries, just to confuse you.</li>
+<li><code>rdr -f printf /usr/lib/libc.so.6</code> - searches the <code>libc.so.6</code> binary for an exported symbol named <em>exactly</em> &quot;printf&quot;, and if found, prints its binary offset and size (in bytes).  <em>Watch out for</em> <code>_</code> prefixed symbols in mach and compiler private symbols in ELF. Definitely watch out for funny (<code>$</code>) symbols, like in mach-o Objective C binaries; you&#39;ll need to quote the symbol name to escape them, otherwise bash gets mad.  Future: regexp multiple returns, and searching imports as well.</li>
+<li><code>rdr -l /usr/lib/libc.so.6</code> - lists the dynamic libraries <code>libc.so.6</code> <em>explicitly</em> depends on (I&#39;m looking at <em>you</em> <code>dlsym</code>).</li>
+<li><code>rdr -i /usr/lib/libc.so.6</code> - lists the imports the binary depends on.  <strong>NOTE</strong> when run on linux binaries, if a system map has been built, it will use that to lookup where the symbol could have come from for you.  Depending on your machine, can add a slight delay; sorry bout that.  On <code>mach-o</code> this delay caused by an extra lookup isn&#39;t necessary, since imports are required to state where they come from, because the format was built by sane people (more or less).</li>
+<li><code>rdr -g /usr/lib/libz.so.1.2.8</code> - graphs the libraries, imports, and exports of <code>libz.so.1.2.8</code>; run <code>dot -O -n -Tpng libz.so.1.2.8.gv</code> to make a pretty picture.  Does a simple, hackish check to see if <code>dot</code> is in your <code>${PATH}</code>, and if so, runs the above dot command for you - you should probably just install it before you run this.  <a href="#examples">See the examples</a> for <code>rdr</code> output. Here is an example of the linux output</li>
+<li><code>rdr -s /usr/lib/libc.so.6</code> - print the nlist/strippable symbol table, if it exists.  Crappy programs like <code>nm</code> <em>only</em> use the strippable symbol table, even for exports and imports.</li>
+<li><code>rdr -v /usr/lib/libc.so.6</code> - print everything.</li>
+</ul>
+
+<h2 id="symbol-map">Symbol Map</h2>
+
+<p><code>rdr</code> can create a &quot;symbol map&quot; for you, in <code>${HOME}/.rdr/</code>.  What&#39;s that you ask?  It&#39;s a map from <code>exported symbol name -&gt; list of symbol info</code>, where symbol information is offset, size, exporting library, etc.</p>
+
+<p>It is a map from keys of symbol names to <em>lists</em> of symbol information, because symbol-to-symbol information is <em>not a function</em>.  To put that less technically: for any given symbol name, <code>malloc</code> for example, you can have multiple libraries which provide (export) that same exact symbol.  It is a one to many relationship.</p>
+
+<p>Nevertheless, with such a map, we can perform a variety of useful activities, like looking up a symbol&#39;s offset in a library, its size, etc.</p>
+
+<p>Why hasn&#39;t this existed before?  I don&#39;t know.</p>
+
+<p>You build the map first by invoking:</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">rdr -b
+</code></pre></div>
+<p>Which defaults to scanning <code>/usr/lib/</code> for things it considers &quot;binaries&quot;.  Basically, it works pretty well.</p>
+
+<p>If you want to recursively search, you give it a directory (or supply none at all, and it uses the default, <code>/usr/lib</code>), and the <code>-r</code> flag:</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash">rdr -b -r -d <span class="s2">&quot;/usr/lib /usr/local/lib&quot;</span>
+</code></pre></div>
+<p>Spaces or colons (&#39;:&#39;) in the <code>-d</code> string separate different directories; with <code>-r</code> set, it searches <em>each</em> recursively.</p>
+
+<p>Be careful (patient); on slow machines, this can take some time.  On a recent MBP, it&#39;s so fast it can build the map in realtime, and then do a symbol lookup (I don&#39;t do that).</p>
+
+<p>After you&#39;ve built the map, you can perform <em>exact</em> symbol lookups, for example:</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>rdr -m -f <span class="nb">printf</span>
+searching /usr/lib/ <span class="k">for</span> <span class="nb">printf</span>:
+           4f0a0 <span class="nb">printf</span> <span class="o">(</span>161<span class="o">)</span> -&gt; /usr/lib/libc-2.21.so
+</code></pre></div>
+<p>Where the output format for each symbol is <code>offset symbol_name (size) -&gt; /path/to/exporting/library</code>.</p>
+
+<p>If you find a symbol you admire, you can disassemble it by adding the <code>-D</code> flag, using <code>llvm-mc</code>.  This is an experimental feature and subject to change (it&#39;ll definitely have to stay in, cause it&#39;s awesome).</p>
+
+<p>Again, I do a simple, hackish check to see if <code>llvm-mc</code> is in your <code>${PATH}</code>, and if so, the program is run, otherwise an error message is printed.  However, to quote a C idiom: &quot;this behavior is undefined&quot; if <code>llvm-mc</code> isn&#39;t installed and in your <code>${PATH}</code>.</p>
+
+<p>Example with <code>llvm-mc</code> correctly installed:</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>rdr -D -m -f <span class="nb">printf</span>
+searching /usr/lib/ <span class="k">for</span> <span class="nb">printf</span>:
+           4f0a0 <span class="nb">printf</span> <span class="o">(</span>161<span class="o">)</span> -&gt; /usr/lib/libc-2.21.so
+    .text
+    subq    <span class="nv">$216</span>, %rsp
+    testb   %al, %al
+    movq    %rsi, 40<span class="o">(</span>%rsp<span class="o">)</span>
+    movq    %rdx, 48<span class="o">(</span>%rsp<span class="o">)</span>
+    movq    %rcx, 56<span class="o">(</span>%rsp<span class="o">)</span>
+    movq    %r8, 64<span class="o">(</span>%rsp<span class="o">)</span>
+    movq    %r9, 72<span class="o">(</span>%rsp<span class="o">)</span>
+    je  55
+    movaps  %xmm0, 80<span class="o">(</span>%rsp<span class="o">)</span>
+    movaps  %xmm1, 96<span class="o">(</span>%rsp<span class="o">)</span>
+    movaps  %xmm2, 112<span class="o">(</span>%rsp<span class="o">)</span>
+    movaps  %xmm3, 128<span class="o">(</span>%rsp<span class="o">)</span>
+    movaps  %xmm4, 144<span class="o">(</span>%rsp<span class="o">)</span>
+    movaps  %xmm5, 160<span class="o">(</span>%rsp<span class="o">)</span>
+    movaps  %xmm6, 176<span class="o">(</span>%rsp<span class="o">)</span>
+    movaps  %xmm7, 192<span class="o">(</span>%rsp<span class="o">)</span>
+    leaq    224<span class="o">(</span>%rsp<span class="o">)</span>, %rax
+    movq    %rdi, %rsi
+    leaq    8<span class="o">(</span>%rsp<span class="o">)</span>, %rdx
+    movq    %rax, 16<span class="o">(</span>%rsp<span class="o">)</span>
+    leaq    32<span class="o">(</span>%rsp<span class="o">)</span>, %rax
+    movl    <span class="nv">$8</span>, 8<span class="o">(</span>%rsp<span class="o">)</span>
+    movl    <span class="nv">$48</span>, 12<span class="o">(</span>%rsp<span class="o">)</span>
+    movq    %rax, 24<span class="o">(</span>%rsp<span class="o">)</span>
+    movq    3464671<span class="o">(</span>%rip<span class="o">)</span>, %rax
+    movq    <span class="o">(</span>%rax<span class="o">)</span>, %rdi
+    callq   -44329
+    addq    <span class="nv">$216</span>, %rsp
+    retq
+</code></pre></div>
+<p>If you don&#39;t like AT&amp;T syntax, then you&#39;re out of luck for now (and in the meantime you should probably become a real hacker and learn to read and understand both).</p>
+
+<p>You can also graph the library dependencies (the <code>.gv</code> file is generated <em>at build time</em>) with <code>rdr -m -g</code>.  Currently, it creates a <code>library_dependency.png</code> file; in the future, this will be named after the map it was generated from, once named maps become a thing.  Also, this <code>.png</code> will be enormous.</p>
+
+<p>Finally, and again at build time, a <code>stats</code> file is generated from the system map in <code>${HOME}/.rdr/</code>; this simply counts the number of times a symbol was <em>imported</em> by every binary analyzed when the system map was built (so with a <code>-d</code> directory specified, the default is <code>/usr/lib/</code>, and so it counts every time some symbol <code>x</code> was imported in every binary found in <code>/usr/lib</code>).  Expect this file to change, or various other statistical files to be created in the <code>${HOME}/.rdr/</code> directory.</p>
+
+<p>Once versioned/named maps are implemented, the stats will be per map.</p>
+
+<p>There are also times that you will want to <code>grep</code> symbols, maybe because you only know a part of it, or etc.</p>
+
+<p>For now, this facility is enabled by writing a <em>flattened</em> symbol map to disk, using <code>rdr -m -w</code>, located at <code>${HOME}/.rdr/</code>.  This file is named <code>symbols</code> and you can <code>grep</code> it to your heart&#39;s content.  It is flattened because each element in the list of symbol information a symbol maps to is output to disk.</p>
+
+<p>So, for example, <code>grep -w &quot;malloc&quot; ~/.rdr/symbols</code> yields:</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">0x16a50 malloc (13) E -&gt; /usr/lib/ld-2.21.so 
+0x576f0 malloc (303) E -&gt; /usr/lib/libasan.so.1.0.0 
+0x7a7b0 malloc (394) E -&gt; /usr/lib/libc-2.21.so 
+0x346f0 malloc (137) E -&gt; /usr/lib/libgvpr.so.2.0.0 
+0x5f90 malloc (1543) E -&gt; /usr/lib/libjemalloc.so.1 
+0xb290 malloc (267) E -&gt; /usr/lib/liblsan.so.0.0.0 
+0x19c0 malloc (299) E -&gt; /usr/lib/libmemusage.so 
+0x1200 malloc (33) E -&gt; /usr/lib/libtbbmalloc_proxy.so.2 
+0x1210 malloc (33) E -&gt; /usr/lib/libtbbmalloc_proxy_debug.so.2 
+0x367a0 malloc (2395) E -&gt; /usr/lib/libtcmalloc.so.4.2.6 
+0x3a640 malloc (2395) E -&gt; /usr/lib/libtcmalloc_and_profiler.so.4.2.6 
+0x3d740 malloc (718) E -&gt; /usr/lib/libtcmalloc_debug.so.4.2.6 
+0x1d2b0 malloc (2395) E -&gt; /usr/lib/libtcmalloc_minimal.so.4.2.6 
+0x242a0 malloc (702) E -&gt; /usr/lib/libtcmalloc_minimal_debug.so.4.2.6 
+0x4d020 malloc (175) E -&gt; /usr/lib/libtsan.so.0.0.0 
+</code></pre></div>
+<h1 id="project-structure">Project Structure</h1>
+
+<p>Because I just knew you were going to ask, I made this <em>sweet</em> graphic, just for you:</p>
+
+<p><img src="/images/project_deps.png" alt="project deps"></p>
+
+<h1 id="examples">Examples</h1>
+
+<ul>
+<li><code>rdr -g /usr/lib/libz.so.1.2.8</code>: <img src="http://www.m4b.io/images/libz.so.1.2.8.gv.png" alt="libz so hard"></li>
+</ul>
 
   </article>
 

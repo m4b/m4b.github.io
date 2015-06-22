@@ -6,13 +6,13 @@
 </description>
     <link>http://www.m4b.io/</link>
     <atom:link href="http://www.m4b.io/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Sun, 21 Jun 2015 17:46:47 -0600</pubDate>
-    <lastBuildDate>Sun, 21 Jun 2015 17:46:47 -0600</lastBuildDate>
+    <pubDate>Sun, 21 Jun 2015 21:00:23 -0600</pubDate>
+    <lastBuildDate>Sun, 21 Jun 2015 21:00:23 -0600</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
     
       <item>
         <title>Rdr Released!</title>
-        <description>&lt;p&gt;I am proud to announce the first release of some software I&amp;#39;ve been working on for a bit.  It&amp;#39;s called &lt;code&gt;rdr&lt;/code&gt;, and here&amp;#39;s the official byline:&lt;/p&gt;
+        <description>&lt;p&gt;I am proud to announce the first release of &lt;a href=&quot;http://github.com/m4b/rdr&quot;&gt;some software&lt;/a&gt; I&amp;#39;ve been working on for a bit.  It&amp;#39;s called &lt;code&gt;rdr&lt;/code&gt;, and here&amp;#39;s the official byline:&lt;/p&gt;
 
 &lt;blockquote&gt;
 &lt;p&gt;&lt;code&gt;rdr&lt;/code&gt; is an OCaml tool/library for doing cross-platform analysis of binaries, by printing headers, locating entry points, showing import and export symbols, their binary offsets and size, etc.&lt;/p&gt;
@@ -35,11 +35,173 @@
 &lt;li&gt;Make pretty graphs, at the binary or symbol map level&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;See the &lt;a href=&quot;http://github.com/m4b/rdr&quot;&gt;README&lt;/a&gt; for more details.&lt;/p&gt;
+&lt;p&gt;See the reproduced &lt;a href=&quot;#README&quot;&gt;README&lt;/a&gt; below, for more details, or head to the &lt;a href=&quot;http://github.com/m4b/rdr&quot;&gt;github site&lt;/a&gt;.&lt;/p&gt;
 
 &lt;p&gt;The project is under active development, and if you&amp;#39;re an OCaml hacker, or even if you&amp;#39;re not, I heartily encourage submissions and pull requests.&lt;/p&gt;
 
 &lt;p&gt;Have fun!&lt;/p&gt;
+
+&lt;hr&gt;
+
+&lt;h1 id=&quot;readme&quot;&gt;README&lt;/h1&gt;
+
+&lt;p&gt;Welcome to the &lt;code&gt;rdr&lt;/code&gt; project.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;rdr&lt;/code&gt; is an OCaml tool/library for doing cross-platform analysis of binaries.  I typically use it for looking up symbol names, finding the address offset, and then running &lt;code&gt;gdb&lt;/code&gt; or &lt;code&gt;lldb&lt;/code&gt; to mess around (you should be using both if you even know what you&amp;#39;re doing).&lt;/p&gt;
+
+&lt;p&gt;I also find that it&amp;#39;s useful for resolving linking errors if you&amp;#39;re trying to build some project, especially some random, misconfigured XCode project, or what have you.&lt;/p&gt;
+
+&lt;p&gt;See the &lt;a href=&quot;#usage&quot;&gt;usage section&lt;/a&gt; for a list of features.&lt;/p&gt;
+
+&lt;p&gt;Currently, only 64-bit &lt;em&gt;ELF&lt;/em&gt; and &lt;em&gt;mach-o&lt;/em&gt; binaries are supported.  32-bit binaries aren&amp;#39;t cool anymore; stop publishing reverse engineering tutorials on them.&lt;/p&gt;
+
+&lt;p&gt;It has no OPAM dependencies (not that I don&amp;#39;t love OPAM) and can be built with the provided &lt;code&gt;build.sh&lt;/code&gt; script, or simply with:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;ocamlbuild.native -lib unix -lib str src/Rdr.native &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; mv Rdr.native rdr
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;I&amp;#39;ll look into getting it on OPAM soon, but it&amp;#39;s in a state of &lt;em&gt;flux&lt;/em&gt; right now, and is under &lt;a href=&quot;TODO.md&quot;&gt;active development&lt;/a&gt;.  Contributions welcome!&lt;/p&gt;
+
+&lt;h1 id=&quot;install&quot;&gt;Install&lt;/h1&gt;
+
+&lt;ul&gt;
+&lt;li&gt;You must have OCaml installed, version 4.02.1.  You&amp;#39;ll need at least 4.01 (I use &lt;code&gt;|&amp;gt;&lt;/code&gt; and &lt;code&gt;@@&lt;/code&gt;), but I haven&amp;#39;t tested on that.&lt;/li&gt;
+&lt;li&gt;You must run the &lt;code&gt;build.sh&lt;/code&gt; script, or execute &lt;code&gt;ocamlbuild.native -lib unix -lib str src/Rdr.native &amp;amp;&amp;amp; mv Rdr.native rdr&lt;/code&gt; in the base directory.&lt;/li&gt;
+&lt;li&gt;You may then copy or symlink the resulting &lt;code&gt;rdr&lt;/code&gt; binary to anywhere that is exported in your &lt;code&gt;${PATH}&lt;/code&gt; (or not do that, if that&amp;#39;s your fancy).&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1 id=&quot;usage&quot;&gt;Usage&lt;/h1&gt;
+
+&lt;p&gt;Essentially, &lt;code&gt;rdr&lt;/code&gt; performs two tasks, and should probably be two programs.&lt;/p&gt;
+
+&lt;h2 id=&quot;binary-analysis&quot;&gt;Binary Analysis&lt;/h2&gt;
+
+&lt;p&gt;The first is pointing &lt;code&gt;rdr&lt;/code&gt; at a binary.  Example:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;rdr /usr/lib/libc.so.6
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;It should output something like: &lt;code&gt;ELF X86_64 DYN @ 0x20920&lt;/code&gt;.  Which is boring.&lt;/p&gt;
+
+&lt;p&gt;You can pass it various flags, &lt;code&gt;-e&lt;/code&gt; for printing the exports found in the binary (see this post on &lt;a href=&quot;http://www.m4b.io/elf/export/binary/analysis/2015/05/25/what-is-an-elf-export.html#conclusion&quot;&gt;ELF exports&lt;/a&gt; for what I&amp;#39;m counting as an &amp;quot;export&amp;quot;), &lt;code&gt;-i&lt;/code&gt; for imports, etc.  For mach-o binaries, exporthood and importhood are clearly defined, so blog posts detailing this aren&amp;#39;t necessary (unless you want a &lt;a href=&quot;http://www.m4b.io/reverse/engineering/mach/binaries/2015/03/29/mach-binaries.html&quot;&gt;detailed analysis of the binary format&lt;/a&gt;).&lt;/p&gt;
+
+&lt;p&gt;Some examples:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;rdr -h&lt;/code&gt; - prints a help menu&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;rdr -h /usr/lib/libc.so.6&lt;/code&gt; - prints the program headers, bookkeeping data, and other beaurocratic aspects of binaries, just to confuse you.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;rdr -f printf /usr/lib/libc.so.6&lt;/code&gt; - searches the &lt;code&gt;libc.so.6&lt;/code&gt; binary for an exported symbol named &lt;em&gt;exactly&lt;/em&gt; &amp;quot;printf&amp;quot;, and if found, prints its binary offset and size (in bytes).  &lt;em&gt;Watch out for&lt;/em&gt; &lt;code&gt;_&lt;/code&gt; prefixed symbols in mach and compiler private symbols in ELF. Definitely watch out for funny (&lt;code&gt;$&lt;/code&gt;) symbols, like in mach-o Objective C binaries; you&amp;#39;ll need to quote the symbol name to escape them, otherwise bash gets mad.  Future: regexp multiple returns, and searching imports as well.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;rdr -l /usr/lib/libc.so.6&lt;/code&gt; - lists the dynamic libraries &lt;code&gt;libc.so.6&lt;/code&gt; &lt;em&gt;explicitly&lt;/em&gt; depends on (I&amp;#39;m looking at &lt;em&gt;you&lt;/em&gt; &lt;code&gt;dlsym&lt;/code&gt;).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;rdr -i /usr/lib/libc.so.6&lt;/code&gt; - lists the imports the binary depends on.  &lt;strong&gt;NOTE&lt;/strong&gt; when run on linux binaries, if a system map has been built, it will use that to lookup where the symbol could have come from for you.  Depending on your machine, can add a slight delay; sorry bout that.  On &lt;code&gt;mach-o&lt;/code&gt; this delay caused by an extra lookup isn&amp;#39;t necessary, since imports are required to state where they come from, because the format was built by sane people (more or less).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;rdr -g /usr/lib/libz.so.1.2.8&lt;/code&gt; - graphs the libraries, imports, and exports of &lt;code&gt;libz.so.1.2.8&lt;/code&gt;; run &lt;code&gt;dot -O -n -Tpng libz.so.1.2.8.gv&lt;/code&gt; to make a pretty picture.  Does a simple, hackish check to see if &lt;code&gt;dot&lt;/code&gt; is in your &lt;code&gt;${PATH}&lt;/code&gt;, and if so, runs the above dot command for you - you should probably just install it before you run this.  &lt;a href=&quot;#examples&quot;&gt;See the examples&lt;/a&gt; for &lt;code&gt;rdr&lt;/code&gt; output. Here is an example of the linux output&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;rdr -s /usr/lib/libc.so.6&lt;/code&gt; - print the nlist/strippable symbol table, if it exists.  Crappy programs like &lt;code&gt;nm&lt;/code&gt; &lt;em&gt;only&lt;/em&gt; use the strippable symbol table, even for exports and imports.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;rdr -v /usr/lib/libc.so.6&lt;/code&gt; - print everything.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;symbol-map&quot;&gt;Symbol Map&lt;/h2&gt;
+
+&lt;p&gt;&lt;code&gt;rdr&lt;/code&gt; can create a &amp;quot;symbol map&amp;quot; for you, in &lt;code&gt;${HOME}/.rdr/&lt;/code&gt;.  What&amp;#39;s that you ask?  It&amp;#39;s a map from &lt;code&gt;exported symbol name -&amp;gt; list of symbol info&lt;/code&gt;, where symbol information is offset, size, exporting library, etc.&lt;/p&gt;
+
+&lt;p&gt;It is a map from keys of symbol names to &lt;em&gt;lists&lt;/em&gt; of symbol information, because symbol-to-symbol information is &lt;em&gt;not a function&lt;/em&gt;.  To put that less technically: for any given symbol name, &lt;code&gt;malloc&lt;/code&gt; for example, you can have multiple libraries which provide (export) that same exact symbol.  It is a one to many relationship.&lt;/p&gt;
+
+&lt;p&gt;Nevertheless, with such a map, we can perform a variety of useful activities, like looking up a symbol&amp;#39;s offset in a library, its size, etc.&lt;/p&gt;
+
+&lt;p&gt;Why hasn&amp;#39;t this existed before?  I don&amp;#39;t know.&lt;/p&gt;
+
+&lt;p&gt;You build the map first by invoking:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;rdr -b
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Which defaults to scanning &lt;code&gt;/usr/lib/&lt;/code&gt; for things it considers &amp;quot;binaries&amp;quot;.  Basically, it works pretty well.&lt;/p&gt;
+
+&lt;p&gt;If you want to recursively search, you give it a directory (or supply none at all, and it uses the default, &lt;code&gt;/usr/lib&lt;/code&gt;), and the &lt;code&gt;-r&lt;/code&gt; flag:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;rdr -b -r -d &lt;span class=&quot;s2&quot;&gt;&amp;quot;/usr/lib /usr/local/lib&amp;quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Spaces or colons (&amp;#39;:&amp;#39;) in the &lt;code&gt;-d&lt;/code&gt; string separate different directories; with &lt;code&gt;-r&lt;/code&gt; set, it searches &lt;em&gt;each&lt;/em&gt; recursively.&lt;/p&gt;
+
+&lt;p&gt;Be careful (patient); on slow machines, this can take some time.  On a recent MBP, it&amp;#39;s so fast it can build the map in realtime, and then do a symbol lookup (I don&amp;#39;t do that).&lt;/p&gt;
+
+&lt;p&gt;After you&amp;#39;ve built the map, you can perform &lt;em&gt;exact&lt;/em&gt; symbol lookups, for example:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;rdr -m -f &lt;span class=&quot;nb&quot;&gt;printf&lt;/span&gt;
+searching /usr/lib/ &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;printf&lt;/span&gt;:
+           4f0a0 &lt;span class=&quot;nb&quot;&gt;printf&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;161&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; -&amp;gt; /usr/lib/libc-2.21.so
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Where the output format for each symbol is &lt;code&gt;offset symbol_name (size) -&amp;gt; /path/to/exporting/library&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;If you find a symbol you admire, you can disassemble it by adding the &lt;code&gt;-D&lt;/code&gt; flag, using &lt;code&gt;llvm-mc&lt;/code&gt;.  This is an experimental feature and subject to change (it&amp;#39;ll definitely have to stay in, cause it&amp;#39;s awesome).&lt;/p&gt;
+
+&lt;p&gt;Again, I do a simple, hackish check to see if &lt;code&gt;llvm-mc&lt;/code&gt; is in your &lt;code&gt;${PATH}&lt;/code&gt;, and if so, the program is run, otherwise an error message is printed.  However, to quote a C idiom: &amp;quot;this behavior is undefined&amp;quot; if &lt;code&gt;llvm-mc&lt;/code&gt; isn&amp;#39;t installed and in your &lt;code&gt;${PATH}&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Example with &lt;code&gt;llvm-mc&lt;/code&gt; correctly installed:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;rdr -D -m -f &lt;span class=&quot;nb&quot;&gt;printf&lt;/span&gt;
+searching /usr/lib/ &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;printf&lt;/span&gt;:
+           4f0a0 &lt;span class=&quot;nb&quot;&gt;printf&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;161&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; -&amp;gt; /usr/lib/libc-2.21.so
+    .text
+    subq    &lt;span class=&quot;nv&quot;&gt;$216&lt;/span&gt;, %rsp
+    testb   %al, %al
+    movq    %rsi, 40&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;%rsp&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+    movq    %rdx, 48&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;%rsp&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+    movq    %rcx, 56&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;%rsp&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+    movq    %r8, 64&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;%rsp&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+    movq    %r9, 72&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;%rsp&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+    je  55
+    movaps  %xmm0, 80&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;%rsp&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+    movaps  %xmm1, 96&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;%rsp&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+    movaps  %xmm2, 112&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;%rsp&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+    movaps  %xmm3, 128&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;%rsp&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+    movaps  %xmm4, 144&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;%rsp&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+    movaps  %xmm5, 160&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;%rsp&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+    movaps  %xmm6, 176&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;%rsp&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+    movaps  %xmm7, 192&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;%rsp&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+    leaq    224&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;%rsp&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;, %rax
+    movq    %rdi, %rsi
+    leaq    8&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;%rsp&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;, %rdx
+    movq    %rax, 16&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;%rsp&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+    leaq    32&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;%rsp&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;, %rax
+    movl    &lt;span class=&quot;nv&quot;&gt;$8&lt;/span&gt;, 8&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;%rsp&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+    movl    &lt;span class=&quot;nv&quot;&gt;$48&lt;/span&gt;, 12&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;%rsp&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+    movq    %rax, 24&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;%rsp&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+    movq    3464671&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;%rip&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;, %rax
+    movq    &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;%rax&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;, %rdi
+    callq   -44329
+    addq    &lt;span class=&quot;nv&quot;&gt;$216&lt;/span&gt;, %rsp
+    retq
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;If you don&amp;#39;t like AT&amp;amp;T syntax, then you&amp;#39;re out of luck for now (and in the meantime you should probably become a real hacker and learn to read and understand both).&lt;/p&gt;
+
+&lt;p&gt;You can also graph the library dependencies (the &lt;code&gt;.gv&lt;/code&gt; file is generated &lt;em&gt;at build time&lt;/em&gt;) with &lt;code&gt;rdr -m -g&lt;/code&gt;.  Currently, it creates a &lt;code&gt;library_dependency.png&lt;/code&gt; file; in the future, this will be named after the map it was generated from, once named maps become a thing.  Also, this &lt;code&gt;.png&lt;/code&gt; will be enormous.&lt;/p&gt;
+
+&lt;p&gt;Finally, and again at build time, a &lt;code&gt;stats&lt;/code&gt; file is generated from the system map in &lt;code&gt;${HOME}/.rdr/&lt;/code&gt;; this simply counts the number of times a symbol was &lt;em&gt;imported&lt;/em&gt; by every binary analyzed when the system map was built (so with a &lt;code&gt;-d&lt;/code&gt; directory specified, the default is &lt;code&gt;/usr/lib/&lt;/code&gt;, and so it counts every time some symbol &lt;code&gt;x&lt;/code&gt; was imported in every binary found in &lt;code&gt;/usr/lib&lt;/code&gt;).  Expect this file to change, or various other statistical files to be created in the &lt;code&gt;${HOME}/.rdr/&lt;/code&gt; directory.&lt;/p&gt;
+
+&lt;p&gt;Once versioned/named maps are implemented, the stats will be per map.&lt;/p&gt;
+
+&lt;p&gt;There are also times that you will want to &lt;code&gt;grep&lt;/code&gt; symbols, maybe because you only know a part of it, or etc.&lt;/p&gt;
+
+&lt;p&gt;For now, this facility is enabled by writing a &lt;em&gt;flattened&lt;/em&gt; symbol map to disk, using &lt;code&gt;rdr -m -w&lt;/code&gt;, located at &lt;code&gt;${HOME}/.rdr/&lt;/code&gt;.  This file is named &lt;code&gt;symbols&lt;/code&gt; and you can &lt;code&gt;grep&lt;/code&gt; it to your heart&amp;#39;s content.  It is flattened because each element in the list of symbol information a symbol maps to is output to disk.&lt;/p&gt;
+
+&lt;p&gt;So, for example, &lt;code&gt;grep -w &amp;quot;malloc&amp;quot; ~/.rdr/symbols&lt;/code&gt; yields:&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;0x16a50 malloc (13) E -&amp;gt; /usr/lib/ld-2.21.so 
+0x576f0 malloc (303) E -&amp;gt; /usr/lib/libasan.so.1.0.0 
+0x7a7b0 malloc (394) E -&amp;gt; /usr/lib/libc-2.21.so 
+0x346f0 malloc (137) E -&amp;gt; /usr/lib/libgvpr.so.2.0.0 
+0x5f90 malloc (1543) E -&amp;gt; /usr/lib/libjemalloc.so.1 
+0xb290 malloc (267) E -&amp;gt; /usr/lib/liblsan.so.0.0.0 
+0x19c0 malloc (299) E -&amp;gt; /usr/lib/libmemusage.so 
+0x1200 malloc (33) E -&amp;gt; /usr/lib/libtbbmalloc_proxy.so.2 
+0x1210 malloc (33) E -&amp;gt; /usr/lib/libtbbmalloc_proxy_debug.so.2 
+0x367a0 malloc (2395) E -&amp;gt; /usr/lib/libtcmalloc.so.4.2.6 
+0x3a640 malloc (2395) E -&amp;gt; /usr/lib/libtcmalloc_and_profiler.so.4.2.6 
+0x3d740 malloc (718) E -&amp;gt; /usr/lib/libtcmalloc_debug.so.4.2.6 
+0x1d2b0 malloc (2395) E -&amp;gt; /usr/lib/libtcmalloc_minimal.so.4.2.6 
+0x242a0 malloc (702) E -&amp;gt; /usr/lib/libtcmalloc_minimal_debug.so.4.2.6 
+0x4d020 malloc (175) E -&amp;gt; /usr/lib/libtsan.so.0.0.0 
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h1 id=&quot;project-structure&quot;&gt;Project Structure&lt;/h1&gt;
+
+&lt;p&gt;Because I just knew you were going to ask, I made this &lt;em&gt;sweet&lt;/em&gt; graphic, just for you:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/images/project_deps.png&quot; alt=&quot;project deps&quot;&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;examples&quot;&gt;Examples&lt;/h1&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;rdr -g /usr/lib/libz.so.1.2.8&lt;/code&gt;: &lt;img src=&quot;http://www.m4b.io/images/libz.so.1.2.8.gv.png&quot; alt=&quot;libz so hard&quot;&gt;&lt;/li&gt;
+&lt;/ul&gt;
 </description>
         <pubDate>Sun, 21 Jun 2015 00:00:00 -0600</pubDate>
         <link>http://www.m4b.io/reverse/engineering/software/release/2015/06/21/rdr-released.html</link>
