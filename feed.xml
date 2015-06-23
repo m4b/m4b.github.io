@@ -6,8 +6,8 @@
 </description>
     <link>http://www.m4b.io/</link>
     <atom:link href="http://www.m4b.io/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Sun, 21 Jun 2015 21:04:04 -0600</pubDate>
-    <lastBuildDate>Sun, 21 Jun 2015 21:04:04 -0600</lastBuildDate>
+    <pubDate>Mon, 22 Jun 2015 19:05:48 -0600</pubDate>
+    <lastBuildDate>Mon, 22 Jun 2015 19:05:48 -0600</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
     
       <item>
@@ -55,17 +55,25 @@
 
 &lt;p&gt;Currently, only 64-bit &lt;em&gt;ELF&lt;/em&gt; and &lt;em&gt;mach-o&lt;/em&gt; binaries are supported.  32-bit binaries aren&amp;#39;t cool anymore; stop publishing reverse engineering tutorials on them.&lt;/p&gt;
 
-&lt;p&gt;It has no OPAM dependencies (not that I don&amp;#39;t love OPAM) and can be built with the provided &lt;code&gt;build.sh&lt;/code&gt; script, or simply with:&lt;/p&gt;
+&lt;p&gt;It has no dependencies (besides the standard libs and &lt;code&gt;unix&lt;/code&gt; and &lt;code&gt;str&lt;/code&gt;) and can be built with the provided &lt;code&gt;build.sh&lt;/code&gt; script, or simply with:&lt;/p&gt;
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;ocamlbuild.native -lib unix -lib str src/Rdr.native &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; mv Rdr.native rdr
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
-&lt;p&gt;I&amp;#39;ll look into getting it on OPAM soon, but it&amp;#39;s in a state of &lt;em&gt;flux&lt;/em&gt; right now, and is under &lt;a href=&quot;TODO.md&quot;&gt;active development&lt;/a&gt;.  Contributions welcome!&lt;/p&gt;
+&lt;p&gt;It is also available via OPAM: &lt;code&gt;opam install rdr&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;rdr&lt;/code&gt; is under &lt;a href=&quot;TODO.md&quot;&gt;active development&lt;/a&gt; --- contributions welcome!&lt;/p&gt;
 
 &lt;h1 id=&quot;install&quot;&gt;Install&lt;/h1&gt;
 
+&lt;h4 id=&quot;easy-(opam)&quot;&gt;Easy (OPAM)&lt;/h4&gt;
+
+&lt;p&gt;Install with OPAM: &lt;code&gt;opam install rdr&lt;/code&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;slightly-less-easy-(manual)&quot;&gt;Slightly Less Easy (Manual)&lt;/h4&gt;
+
 &lt;ul&gt;
-&lt;li&gt;You must have OCaml installed, version 4.02.1.  You&amp;#39;ll need at least 4.01 (I use &lt;code&gt;|&amp;gt;&lt;/code&gt; and &lt;code&gt;@@&lt;/code&gt;), but I haven&amp;#39;t tested on that.&lt;/li&gt;
-&lt;li&gt;You must run the &lt;code&gt;build.sh&lt;/code&gt; script, or execute &lt;code&gt;ocamlbuild.native -lib unix -lib str src/Rdr.native &amp;amp;&amp;amp; mv Rdr.native rdr&lt;/code&gt; in the base directory.&lt;/li&gt;
-&lt;li&gt;You may then copy or symlink the resulting &lt;code&gt;rdr&lt;/code&gt; binary to anywhere that is exported in your &lt;code&gt;${PATH}&lt;/code&gt; (or not do that, if that&amp;#39;s your fancy).&lt;/li&gt;
+&lt;li&gt;You must have OCaml installed, at least version 4.02 (I use the &lt;code&gt;Bytes&lt;/code&gt; module).&lt;/li&gt;
+&lt;li&gt;You must run &lt;code&gt;make&lt;/code&gt;, or the &lt;code&gt;build.sh&lt;/code&gt; script, or execute &lt;code&gt;ocamlbuild.native -lib unix -lib str src/Rdr.native &amp;amp;&amp;amp; mv Rdr.native rdr&lt;/code&gt; in the base project directory.&lt;/li&gt;
+&lt;li&gt;You may then &lt;code&gt;make install&lt;/code&gt; to copy the binary to your &lt;code&gt;${HOME}/bin&lt;/code&gt;, or you can copy or symlink the resulting &lt;code&gt;rdr&lt;/code&gt; binary to anywhere that is exported in your &lt;code&gt;${PATH}&lt;/code&gt; (or not do that, if that&amp;#39;s your fancy).&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;h1 id=&quot;usage&quot;&gt;Usage&lt;/h1&gt;

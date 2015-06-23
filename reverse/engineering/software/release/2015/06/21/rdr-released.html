@@ -118,17 +118,25 @@
 
 <p>Currently, only 64-bit <em>ELF</em> and <em>mach-o</em> binaries are supported.  32-bit binaries aren&#39;t cool anymore; stop publishing reverse engineering tutorials on them.</p>
 
-<p>It has no OPAM dependencies (not that I don&#39;t love OPAM) and can be built with the provided <code>build.sh</code> script, or simply with:</p>
+<p>It has no dependencies (besides the standard libs and <code>unix</code> and <code>str</code>) and can be built with the provided <code>build.sh</code> script, or simply with:</p>
 <div class="highlight"><pre><code class="language-bash" data-lang="bash">ocamlbuild.native -lib unix -lib str src/Rdr.native <span class="o">&amp;&amp;</span> mv Rdr.native rdr
 </code></pre></div>
-<p>I&#39;ll look into getting it on OPAM soon, but it&#39;s in a state of <em>flux</em> right now, and is under <a href="TODO.md">active development</a>.  Contributions welcome!</p>
+<p>It is also available via OPAM: <code>opam install rdr</code>.</p>
+
+<p><code>rdr</code> is under <a href="TODO.md">active development</a> --- contributions welcome!</p>
 
 <h1 id="install">Install</h1>
 
+<h4 id="easy-(opam)">Easy (OPAM)</h4>
+
+<p>Install with OPAM: <code>opam install rdr</code></p>
+
+<h4 id="slightly-less-easy-(manual)">Slightly Less Easy (Manual)</h4>
+
 <ul>
-<li>You must have OCaml installed, version 4.02.1.  You&#39;ll need at least 4.01 (I use <code>|&gt;</code> and <code>@@</code>), but I haven&#39;t tested on that.</li>
-<li>You must run the <code>build.sh</code> script, or execute <code>ocamlbuild.native -lib unix -lib str src/Rdr.native &amp;&amp; mv Rdr.native rdr</code> in the base directory.</li>
-<li>You may then copy or symlink the resulting <code>rdr</code> binary to anywhere that is exported in your <code>${PATH}</code> (or not do that, if that&#39;s your fancy).</li>
+<li>You must have OCaml installed, at least version 4.02 (I use the <code>Bytes</code> module).</li>
+<li>You must run <code>make</code>, or the <code>build.sh</code> script, or execute <code>ocamlbuild.native -lib unix -lib str src/Rdr.native &amp;&amp; mv Rdr.native rdr</code> in the base project directory.</li>
+<li>You may then <code>make install</code> to copy the binary to your <code>${HOME}/bin</code>, or you can copy or symlink the resulting <code>rdr</code> binary to anywhere that is exported in your <code>${PATH}</code> (or not do that, if that&#39;s your fancy).</li>
 </ul>
 
 <h1 id="usage">Usage</h1>
