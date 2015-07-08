@@ -18,10 +18,15 @@ body {
   font-family: Helvetica, Arial, sans-serif;
   font-size: 16px;
   line-height: 1.5;
-  font-weight: 300;
   color: #111;
   background-color: #fdfdfd;
   -webkit-text-size-adjust: 100%; }
+
+td, table, th {
+  border: 1px solid #CCC; }
+
+tr:nth-child(even) {
+  background-color: #F8F8F8; }
 
 /**
  * Set `margin-bottom` to maintain vertical rhythm

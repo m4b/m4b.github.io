@@ -636,20 +636,81 @@ toc_maximum: 3
 <p>The special dylib isn&#39;t actually a field, but it&#39;s useful consider it as one.  You see this value set by the <code>BIND_OPCODE_SET_DYLIB_SPECIAL_IMM</code> opcode, which says the import comes from itself, from the main executable, or is a flat lookup symbol (like linux).</p>
 
 <p>When the FSA starts its loop (or recurses), it always eats a single byte, which it then bitmasks with 0xF0 to get the bind &quot;opcode&quot;.  All of the valid (import) bind opcodes are as follows:</p>
-<div class="highlight"><pre><code class="language-text" data-lang="text">0x00 -&gt;  BIND_OPCODE_DONE
-0x10 -&gt;  BIND_OPCODE_SET_DYLIB_ORDINAL_IMM
-0x20 -&gt;  BIND_OPCODE_SET_DYLIB_ORDINAL_ULEB
-0x30 -&gt;  BIND_OPCODE_SET_DYLIB_SPECIAL_IMM
-0x40 -&gt;  BIND_OPCODE_SET_SYMBOL_TRAILING_FLAGS_IMM
-0x50 -&gt;  BIND_OPCODE_SET_TYPE_IMM
-0x60 -&gt;  BIND_OPCODE_SET_ADDEND_SLEB
-0x70 -&gt;  BIND_OPCODE_SET_SEGMENT_AND_OFFSET_ULEB
-0x80 -&gt;  BIND_OPCODE_ADD_ADDR_ULEB
-0x90 -&gt;  BIND_OPCODE_DO_BIND
-0xa0 -&gt;  BIND_OPCODE_DO_BIND_ADD_ADDR_ULEB
-0xb0 -&gt;  BIND_OPCODE_DO_BIND_ADD_ADDR_IMM_SCALED
-0xc0 -&gt;  BIND_OPCODE_DO_BIND_ULEB_TIMES_SKIPPING_ULEB
-</code></pre></div>
+
+<table><thead>
+<tr>
+<th style="text-align: center">Opcode</th>
+<th style="text-align: center">C Opcode Macro Name</th>
+<th style="text-align: left">Function</th>
+</tr>
+</thead><tbody>
+<tr>
+<td style="text-align: center">0x00</td>
+<td style="text-align: center">BIND_OPCODE_DONE</td>
+<td style="text-align: left">Push current record onto the &quot;import stack&quot; and clear record state back to zeros</td>
+</tr>
+<tr>
+<td style="text-align: center">0x10</td>
+<td style="text-align: center">BIND_OPCODE_SET_DYLIB_ORDINAL_IMM</td>
+<td style="text-align: left">Set the current record&#39;s dynamic library ordinal field (an index into the dynamic libraries referenced in the load commands, in the order they appeared) to the value contained in the immediate</td>
+</tr>
+<tr>
+<td style="text-align: center">0x20</td>
+<td style="text-align: center">BIND_OPCODE_SET_DYLIB_ORDINAL_ULEB</td>
+<td style="text-align: left">Set the current record&#39;s dynamic library ordinal field to Uleb128 byte stream following the opcode</td>
+</tr>
+<tr>
+<td style="text-align: center">0x30</td>
+<td style="text-align: center">BIND_OPCODE_SET_DYLIB_SPECIAL_IMM</td>
+<td style="text-align: left">Set the current record&#39;s dynamic library ordinal field to 1 of 3 special values, either self (0x0), main executable (0xf, or signed -1), or flat lookup (0xe, or signed -2)</td>
+</tr>
+<tr>
+<td style="text-align: center">0x40</td>
+<td style="text-align: center">BIND_OPCODE_SET_SYMBOL_TRAILING_FLAGS_IMM</td>
+<td style="text-align: left">Set the current record&#39;s symbol name to the null-terminated string following the opcode, and the flags to the value contained in the immediate</td>
+</tr>
+<tr>
+<td style="text-align: center">0x50</td>
+<td style="text-align: center">BIND_OPCODE_SET_TYPE_IMM</td>
+<td style="text-align: left">Set the current record&#39;s symbol type (pointer = 1, relative = 2, or absolute = 3) to the value contained in the immediate</td>
+</tr>
+<tr>
+<td style="text-align: center">0x60</td>
+<td style="text-align: center">BIND_OPCODE_SET_ADDEND_SLEB</td>
+<td style="text-align: left">Set the current record&#39;s addend to the Sleb128 byte stream following the opcode</td>
+</tr>
+<tr>
+<td style="text-align: center">0x70</td>
+<td style="text-align: center">BIND_OPCODE_SET_SEGMENT_AND_OFFSET_ULEB</td>
+<td style="text-align: left">Set the current record&#39;s segment index to the value contained in the immediate, and its offset in that segment to the Uleb128 byte stream following the opcode</td>
+</tr>
+<tr>
+<td style="text-align: center">0x80</td>
+<td style="text-align: center">BIND_OPCODE_ADD_ADDR_ULEB</td>
+<td style="text-align: left">Set the current record&#39;s segment offset to its current offset <em>plus</em> the value of Uleb128 byte stream following the opcode</td>
+</tr>
+<tr>
+<td style="text-align: center">0x90</td>
+<td style="text-align: center">BIND_OPCODE_DO_BIND</td>
+<td style="text-align: left">Push the current record onto the &quot;import stack&quot;, and <strong>then</strong> increment the current record&#39;s address offset by the size of the platform pointer (32 or 64 bit)</td>
+</tr>
+<tr>
+<td style="text-align: center">0xa0</td>
+<td style="text-align: center">BIND_OPCODE_DO_BIND_ADD_ADDR_ULEB</td>
+<td style="text-align: left">Push the current record onto the &quot;import stack&quot;, and <strong>then</strong> set the current record&#39;s address offset to its current value plus the size of a platform pointer <em>plus</em> the Uleb128 byte stream that follows the opcode</td>
+</tr>
+<tr>
+<td style="text-align: center">0xb0</td>
+<td style="text-align: center">BIND_OPCODE_DO_BIND_ADD_ADDR_IMM_SCALED</td>
+<td style="text-align: left">Push the current record onto the &quot;import stack&quot;, and <strong>then</strong> set the current record&#39;s address offset to: <code>seg_offset = seg_offset + (scale * sizeofptr) + sizeofptr</code> where <code>scale</code> is the value contained in the immediate and <code>sizeofptr</code> is the size of the pointer on the platform</td>
+</tr>
+<tr>
+<td style="text-align: center">0xc0</td>
+<td style="text-align: center">BIND_OPCODE_DO_BIND_ULEB_TIMES_SKIPPING_ULEB</td>
+<td style="text-align: left">Push the current record, and consult the <code>dyld</code> source, too complicated to write</td>
+</tr>
+</tbody></table>
+
 <p>Our FSA starts on this line of hex, at offset 0x8:</p>
 <div class="highlight"><pre><code class="language-text" data-lang="text">00002000: 1122 2053 0000 0000 1140 5f6b 544f 435f  .&quot; S.....@_kTOC_
 </code></pre></div>
