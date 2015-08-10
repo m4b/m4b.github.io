@@ -6,9 +6,66 @@
 </description>
     <link>http://www.m4b.io/</link>
     <atom:link href="http://www.m4b.io/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Tue, 07 Jul 2015 21:24:36 -0600</pubDate>
-    <lastBuildDate>Tue, 07 Jul 2015 21:24:36 -0600</lastBuildDate>
+    <pubDate>Mon, 10 Aug 2015 00:02:15 -0600</pubDate>
+    <lastBuildDate>Mon, 10 Aug 2015 00:02:15 -0600</lastBuildDate>
     <generator>Jekyll v2.4.0</generator>
+    
+      <item>
+        <title>First Silicon Element Released!</title>
+        <description>&lt;p&gt;I am very pleased to announce the first official release of the first &lt;code&gt;silicon-elements&lt;/code&gt; element, &lt;code&gt;silicon-hex-table&lt;/code&gt;.  So much silicon and firsts!&lt;/p&gt;
+
+&lt;p&gt;Check out its &lt;a href=&quot;http://github.com/m4b/silicon-hex-table&quot;&gt;github repo&lt;/a&gt; or its very beautiful &lt;a href=&quot;http://m4b.github.io/silicon-hex-table&quot;&gt;documentation page&lt;/a&gt;.  &lt;img class=&#39;emoji&#39; title=&#39;:star:&#39; alt=&#39;:star:&#39; src=&#39;https://assets.github.com/images/icons/emoji/unicode/2b50.png&#39; height=&#39;20&#39; width=&#39;20&#39; align=&#39;absmiddle&#39; /&gt; it!  Fork it!  Love it!&lt;/p&gt;
+
+&lt;p&gt;So I&amp;#39;ve decided to steal the silicon namespace and reserve it for reverse engineering, binary analysis, and hardware --- i.e., silicon --- related web components.  I&amp;#39;ll have to create a project or organization soon, so for the odd mix of web developer interested in web components and reverse engineering and binary analysis kind of people, we have a place to push all our silicon components.  Send me a line if you&amp;#39;ve got some ideas; let&amp;#39;s make some things.&lt;/p&gt;
+
+&lt;p&gt;But if you don&amp;#39;t know what web components are, which you might not, if you&amp;#39;re the one of three people who probably read this weblog for some reason, then you should head over to the &lt;a href=&quot;http://polymer-project.org&quot;&gt;Polymer project site&lt;/a&gt; for Google&amp;#39;s take on the web&amp;#39;s web-component revolution, where the web is ushered into the 70s in software engineering.&lt;/p&gt;
+
+&lt;p&gt;In any event, it means we can do sweet stuff like this:&lt;/p&gt;
+
+&lt;p&gt;&lt;hex-scroll&gt;&lt;/hex-scroll&gt;&lt;/p&gt;
+
+&lt;p&gt;Which is a hex table/viewer for &lt;code&gt;/bin/ls&lt;/code&gt; (try offset &lt;code&gt;0x1000&lt;/code&gt;).&lt;/p&gt;
+
+&lt;p&gt;So I&amp;#39;ll be working overtime this week, in my spare time, to release some things I&amp;#39;ve been working on, some random, and some which I&amp;#39;m pretty excited about.  More on that later, hopefully.&lt;/p&gt;
+
+&lt;p&gt;Wish me luck, and enjoy!&lt;/p&gt;
+</description>
+        <pubDate>Sun, 09 Aug 2015 00:00:00 -0600</pubDate>
+        <link>http://www.m4b.io/polymer/silicon/web/components/2015/08/09/first-silicon-element-released.html</link>
+        <guid isPermaLink="true">http://www.m4b.io/polymer/silicon/web/components/2015/08/09/first-silicon-element-released.html</guid>
+        
+        <category>hex</category>
+        
+        <category>hexadecimal</category>
+        
+        <category>hex editor</category>
+        
+        <category>polymer</category>
+        
+        <category>web components</category>
+        
+        <category>components</category>
+        
+        <category>reverse engineering</category>
+        
+        <category>analysis</category>
+        
+        <category>object</category>
+        
+        <category>binary</category>
+        
+        <category>binaries</category>
+        
+        
+        <category>polymer</category>
+        
+        <category>silicon</category>
+        
+        <category>web</category>
+        
+        <category>components</category>
+        
+      </item>
     
       <item>
         <title>The Fault Is Not In Our Stars</title>
